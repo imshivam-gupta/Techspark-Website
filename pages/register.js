@@ -39,7 +39,7 @@ export default function RegisterPage() {
       .then((data) => {
         if(data){
             showToast();
-            router.push("http://localhost:3000/login");
+            router.push("https://techspark.vercel.app/login");
         }  
       });
   };

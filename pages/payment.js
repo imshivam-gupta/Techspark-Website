@@ -266,7 +266,7 @@ export const getServerSideProps = async ({ req, res }) => {
   // console.log(session.email);
 
   if (session) {
-    const req_sample = await fetch(`http://localhost:3000/api/cart`, {
+    const req_sample = await fetch(`https://techspark.vercel.app/api/cart`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

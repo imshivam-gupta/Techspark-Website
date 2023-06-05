@@ -159,7 +159,7 @@ const Shipping = ({ cart }) => {
     }
   
     try {
-      await axios.post("http://localhost:3000/api/order", {
+      await axios.post("https://techspark.vercel.app/api/order", {
         items: cart.items.map((item) => ({
           productId: item.productId,
           quantity: item.quantity,
@@ -439,7 +439,7 @@ export const getServerSideProps = async ({ req, res }) => {
 
   if (session) {
     try {
-      const response = await axios.get("http://localhost:3000/api/cart", {
+      const response = await axios.get("https://techspark.vercel.app/api/cart", {
         headers: {
           "Content-Type": "application/json",
           user_email: session.email,

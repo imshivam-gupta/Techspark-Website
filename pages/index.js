@@ -58,23 +58,14 @@ export async function getStaticProps() {
 
   try {
     const req_sample = await fetch(
-      `http://localhost:3000/api/products/`,
+      `https://techspark.vercel.app/api/products/`,
       {
         method: "GET",
       }
     );
     const data = await req_sample.json();
     const products=data.data;
-    // const res = await fetch('http://localhost:3000/api/products');
-    // if (!res.ok) {
-    //   return {
-    //     redirect: {
-    //       destination: '/custom'
-    //     }
-    //   }
-    // }
-    // const products = await res.json();
-  
+   
   
     return {
       props: {

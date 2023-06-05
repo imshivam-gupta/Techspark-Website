@@ -437,7 +437,7 @@ export async function getStaticProps(context) {
 
   try{
   const req_sample = await fetch(
-    `http://localhost:3000/api/products/${context.params.productid}`,
+    `https://techspark.vercel.app/api/products/${context.params.productid}`,
     {
       method: "GET",
     }
