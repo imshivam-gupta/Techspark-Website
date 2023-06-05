@@ -19,7 +19,7 @@ export default async function handler(req, res) {
     
             if (cart) {
               const ans = await cart.populate("items.productId");
-              res.status(200).json({ success: true, ans });
+              res.status(200).json({ cart });
             } else {
               res
                 .status(200)
@@ -40,7 +40,6 @@ export default async function handler(req, res) {
             const cart = await Cart.findOne({ user: user._id });
 
             
-    
             const { productId, qty } = req.body;
             const product = await Product.findOne({ _id: productId });
 

@@ -34,7 +34,7 @@ const Product = ({ product }) => {
     <div className="w-72 bg-white shadow-2xl rounded-xl duration-500 border hover:scale-105 hover:shadow-xl mb-4">
       <Link href={`product/${product._id}`}>
         <img
-          src={product.image}
+          src={product.main_image}
           alt="Product"
           className="h-48 w-full object-contain rounded-t-xl object-contain"
         />

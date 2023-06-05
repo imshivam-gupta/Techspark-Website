@@ -41,9 +41,10 @@ const mongoose = require("mongoose");
 const reviewSchema = mongoose.Schema(
   {
     name: { type: String, required: true },
+    email: { type: String, required: true },
     rating: { type: Number, required: true },
     comment: { type: String, required: true },
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    profile_image: { type: String, required: true },
   },
   {
     timestamps: true,
@@ -62,7 +63,7 @@ const offerSchema = mongoose.Schema(
 
 const productSchema = new mongoose.Schema(
   {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, //which user creates
+    user_email: { type: String, required: true }, //which user creates
     name: { type: String, required: true }, // name of the product
     main_image: { type: String, required: true }, // main image of the product
     all_images: [ { type: String, required: true } ], // all images of the product

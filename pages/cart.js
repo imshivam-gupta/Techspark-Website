@@ -1,5 +1,6 @@
 import { getServerSession } from "next-auth";
 import { getSession, useSession } from "next-auth/react";
+import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useState } from "react";
@@ -80,6 +81,12 @@ const CartScreen = ({ cart }) => {
   console.log(cartState);
 
   return (
+    <>
+    <Head>
+      <title>Cart</title>
+      {/* Logo */}
+      <link rel="icon" href="/logosvg.svg" />
+    </Head>
     <div className="bg-gray-100 min-h-screen">
       <div className="container mx-auto py-10">
         <div className="flex">
@@ -207,6 +214,7 @@ const CartScreen = ({ cart }) => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
@@ -224,7 +232,7 @@ export const getServerSideProps = async ({ req, res }) => {
       },
     });
     const data = await req_sample.json();
-    const cart_res = data.ans;
+    const cart_res = data.cart;
 
     const cartTotal = cart_res.items.reduce(
       (total, item) => total + item.qty * item.productId.price,

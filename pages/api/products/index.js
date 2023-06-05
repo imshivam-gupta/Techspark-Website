@@ -14,10 +14,23 @@ export default async function handler(req, res) {
     switch (method) {
 
         case "GET":
-
+          
+        
           try {
-            const products = await Product.find();
-            res.status(200).json({ success: true, data: products });
+            
+            const pageSize = 50
+            const page = Number(req.query.pageNumber) || 1 
+
+            const keyword = req.query.keyword?{
+              name:{
+                  $regex: req.query.keyword,
+                  $options: 'i'
+              }
+            }: {}
+
+            const count = await Product.count({...keyword})
+            const products = await Product.find({...keyword}).limit(pageSize).skip(pageSize*(page-1));
+            res.status(200).json({data: products,page,pages: Math.ceil(count/pageSize) });
           } catch (error) {
             log(error);
             res.status(400).json({ success: false });

@@ -16,6 +16,7 @@ import {
   RocketLaunchIcon,
   Bars2Icon,
 } from "@heroicons/react/24/outline";
+import { useRouter } from "next/router";
 
 const profileMenuItems = [
   {
@@ -108,7 +109,24 @@ function ProfileMenu({data}) {
 
 function Navbar({ user }) {
   const { data: session, status } = useSession();
+  const [keyword,setKeyword] = useState('')
   const loading = status === "loading";
+
+  const router = useRouter();
+
+  const submitHandler = (e) => {
+    e.preventDefault()
+
+    if(keyword.trim()){
+        router.push(`/search/?query=${keyword}`)
+    }
+    else{
+      router.push(`/`)
+    }
+  }
+
+
+  // console.log(session);
 
   return (
     <nav className="flex flex-row justify-around py-2 px-4 bg-white-200 relative gap-4 shadow-xl z-50">
@@ -120,7 +138,7 @@ function Navbar({ user }) {
         </Link>
       </div>
 
-      <div className="relative w-4/12 h-full">
+      <form className="relative w-4/12 h-full" onSubmit={submitHandler}>
         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
           <svg
             aria-hidden="true"
@@ -144,8 +162,9 @@ function Navbar({ user }) {
           className="block w-full py-3 pl-10 text-sm text-gray-900 border border-gray-300 outline-none rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
           placeholder="Search Laptops, Keyboards..."
           required
+          onChange={e => setKeyword(e.target.value)}
         />
-      </div>
+      </form>
 
       <ul className={`flex w-5/12 items-center justify-end pr-4 ${ !session && loading ? "opacity-0" : "opacity-100"} transition-opacity`}>
         <li>
