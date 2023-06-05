@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import User from "../../../models/user";
-import Order from "../../../models/Order";
+import Order from "../../../models/order";
 
 export default async function handler(req, res) {
   try {
