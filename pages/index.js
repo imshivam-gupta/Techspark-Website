@@ -45,7 +45,7 @@ function HomePage(props) {
   );
 }
 
-export async function getStaticProps() {
+export async function getServerSideProps() {
 
   // const client  = await MongoClient.connect(process.env.DB_URL);
   // const db = client.db();
@@ -77,7 +77,7 @@ export async function getStaticProps() {
           brand: product.brand
         })),
       },
-      revalidate: 60,
+      // revalidate: 60,
     }
   } catch (error) {
     return{

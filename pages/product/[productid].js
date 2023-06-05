@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MongoClient } from "mongodb";
+// import { MongoClient } from "mongodb";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import {
@@ -419,21 +419,21 @@ const ProductDetails = (props) => {
   );
 };
 
-export async function getStaticPaths() {
-  const client = await MongoClient.connect(process.env.DB_URL);
-  const db = client.db();
-  const productCollection = db.collection("products");
-  const products = await productCollection.find({}, { _id: 1 }).toArray();
+// export async function getStaticPaths() {
+//   const client = await MongoClient.connect(process.env.DB_URL);
+//   const db = client.db();
+//   const productCollection = db.collection("products");
+//   const products = await productCollection.find({}, { _id: 1 }).toArray();
 
-  return {
-    fallback: false,
-    paths: products.map((product) => ({
-      params: { productid: product._id.toString() },
-    })),
-  };
-}
+//   return {
+//     fallback: false,
+//     paths: products.map((product) => ({
+//       params: { productid: product._id.toString() },
+//     })),
+//   };
+// }
 
-export async function getStaticProps(context) {
+export async function getServerSideProps(context) {
 
   try{
   const req_sample = await fetch(
@@ -476,7 +476,7 @@ export async function getStaticProps(context) {
         reviews: data.reviews,
       },
     },
-    revalidate: 60,
+    // revalidate: 60,
   };
 } catch{
   return {
@@ -494,7 +494,7 @@ export async function getStaticProps(context) {
         reviews: [],
       },
     },
-    revalidate: 60,
+    // revalidate: 60,
   };
 }
 }
