@@ -16,7 +16,6 @@ export default async function handler(req, res) {
           try {
             const user = User.findOne({ email: user_email });
             const cart = await Cart.findOne({ user :user._id });
-    
             if (cart) {
               const ans = await cart.populate("items.productId");
               res.status(200).json({ cart });

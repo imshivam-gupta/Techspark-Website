@@ -30,6 +30,7 @@ const Product = ({ product }) => {
     }
   };
 
+  
   return (
     <div className="w-72 bg-white shadow-2xl rounded-xl duration-500 border hover:scale-105 hover:shadow-xl mb-4">
       <Link href={`product/${product._id}`}>

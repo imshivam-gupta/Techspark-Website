@@ -14,8 +14,7 @@ export default async function handler(req, res) {
     switch (method) {
 
         case "GET":
-          
-        
+            
           try {
             
             const pageSize = 50
