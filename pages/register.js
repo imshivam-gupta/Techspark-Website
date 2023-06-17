@@ -26,7 +26,7 @@ export default function RegisterPage() {
   };
 
   const onSubmit = async (values) => {
-    console.log(values);
+    // console.log(values);
 
     await fetch("/api/auth/signup", {
       method: "POST",
@@ -39,7 +39,7 @@ export default function RegisterPage() {
       .then((data) => {
         if(data){
             showToast();
-            router.push("https://techspark.vercel.app/login");
+            router.push("/login");
         }  
       });
   };

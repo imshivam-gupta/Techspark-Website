@@ -1,7 +1,6 @@
-import Product from "../../../models/product";
 import mongoose from "mongoose";
 import User from "../../../models/user";
-import { log } from "console";
+
 
 export default async function handler(req, res) {
  
@@ -16,32 +15,16 @@ export default async function handler(req, res) {
         case "GET":
             
           try {
-            
-            const pageSize = 50
-            const page = Number(req.query.pageNumber) || 1 
-
-            const keyword = req.query.keyword?{
-              name:{
-                  $regex: req.query.keyword,
-                  $options: 'i'
-              }
-            }: {}
-
-            const count = await Product.count({...keyword})
-            const products = await Product.find({...keyword}).limit(pageSize).skip(pageSize*(page-1));
-            res.status(200).json({data: products,page,pages: Math.ceil(count/pageSize) });
+            const user_email = req.headers.user_email;
+            const user = await User.findOne({ email: user_email });
+            res.status(200).json({data: user});
           } catch (error) {
             console.log(error);
-            res.status(400).json({ success: false });
-          } finally
-          {
-            // mongoose.connection.close();
-          }
-    
+            res.status(400).json({ message: "user not found" });
+          } 
 
           break;
     
-        case "POST":
           try {
 
             const user_email = req.headers.user_email;

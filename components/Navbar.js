@@ -1,5 +1,5 @@
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { signOut, useSession } from "next-auth/react";
 import { Avatar, Button, Menu, MenuHandler, MenuItem, MenuList, Typography } from "@material-tailwind/react";
 
@@ -16,93 +16,104 @@ import {
   RocketLaunchIcon,
   Bars2Icon,
 } from "@heroicons/react/24/outline";
+
+
+
 import { useRouter } from "next/router";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchProductData } from "../store/products-actions";
 
 const profileMenuItems = [
   {
     label: "My Profile",
     icon: UserCircleIcon,
+    url: "/profile"
   },
   {
     label: "Edit Profile",
     icon: Cog6ToothIcon,
+    url: "/edit-profile"
   },
   {
-    label: "Inbox",
+    label: "My Orders",
     icon: InboxArrowDownIcon,
+    url: "/my-orders"
   },
   {
-    label: "Help",
+    label: "Developer",
     icon: LifebuoyIcon,
+    url: "/developer"
   },
   {
     label: "Sign Out",
     icon: PowerIcon,
+    url: "/signout"
   },
 ];
  
 function ProfileMenu({data}) {
 
-
+  const router= useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const closeMenu = () => setIsMenuOpen(false);
  
   return (
-    <Menu open={isMenuOpen} handler={setIsMenuOpen} placement="bottom-end">
-      <MenuHandler>
-        <Button
-          variant="text"
-          color="blue-gray"
-          className="flex items-center gap-1 rounded-full py-0.5 pr-2 pl-0.5 lg:ml-auto"
-        >
-          <Avatar
-            variant="circular"
-            size="sm"
-            alt="candice wu"
-            className="border border-blue-500 p-0.5"
-            src={data.image}
-          />
-          <ChevronDownIcon
-            strokeWidth={2.5}
-            className={`h-3 w-3 transition-transform ${
-              isMenuOpen ? "rotate-180" : ""
-            }`}
-          />
-        </Button>
-      </MenuHandler>
-      <MenuList className="p-1">
-        {profileMenuItems.map(({ label, icon }, key) => {
-          const isLastItem = key === profileMenuItems.length - 1;
-          return (
-            <MenuItem
-              key={label}
-              onClick={isLastItem ?   (e) => {
-                e.preventDefault();
-                signOut(); 
-              } : closeMenu}
-              className={`flex items-center gap-2 rounded ${
-                isLastItem
-                  ? "hover:bg-red-500/10 focus:bg-red-500/10 active:bg-red-500/10"
-                  : ""
+    
+      <Menu open={isMenuOpen} handler={setIsMenuOpen} placement="bottom-end">
+        <MenuHandler>
+          <Button
+            variant="text"
+            color="blue-gray"
+            className="flex items-center gap-1 rounded-full py-0.5 pr-2 pl-0.5 lg:ml-auto"
+          >
+            <Avatar
+              variant="circular"
+              size="sm"
+              alt="candice wu"
+              className="border border-blue-500 p-0.5"
+              src={data.image}
+            />
+            <ChevronDownIcon
+              strokeWidth={2.5}
+              className={`h-3 w-3 transition-transform ${
+                isMenuOpen ? "rotate-180" : ""
               }`}
-            >
-              {React.createElement(icon, {
-                className: `h-4 w-4 ${isLastItem ? "text-red-500" : ""}`,
-                strokeWidth: 2,
-              })}
-              <Typography
-                as="span"
-                variant="small"
-                className="font-normal"
-                color={isLastItem ? "red" : "inherit"}
+            />
+          </Button>
+        </MenuHandler>
+        <MenuList className="p-1">
+
+          {profileMenuItems.slice(0,profileMenuItems.length-1).map(({ label, icon,url }, key) => {
+            const isLastItem = key === profileMenuItems.length - 1;
+            return (
+              <MenuItem
+                key={label}
+                onClick={ ()=>{router.push(url)}}
+                className={`flex items-center gap-2 rounded ${
+                  isLastItem
+                    ? "hover:bg-red-500/10 focus:bg-red-500/10 active:bg-red-500/10"
+                    : ""
+                }`}
               >
-                {label}
-              </Typography>
-            </MenuItem>
-          );
-        })}
-      </MenuList>
-    </Menu>
+
+                {React.createElement(icon, {
+                  className: `h-4 w-4 ${isLastItem ? "text-red-500" : ""}`,
+                  strokeWidth: 2,
+                })}
+                <Typography
+                  as="span"
+                  variant="small"
+                  className="font-normal"
+                  color={isLastItem ? "red" : "inherit"}
+                >
+                  {label}
+                </Typography>
+              </MenuItem>
+            );
+          })}
+        </MenuList>
+      </Menu>
+ 
   );
 }
 
@@ -125,21 +136,31 @@ function Navbar({ user }) {
     }
   }
 
+  const dispatch = useDispatch();
 
-  // console.log(session);
+  const productState = useSelector((state) => state.products);
+  const { products, prodloading=loading } = productState;
+
+  useEffect(() => {
+    if(products.length === 0) dispatch(fetchProductData());
+  }, [dispatch]);
+
+  const distinctCategory = [...new Set(products.map((product) => product.category))];
+
 
   return (
     <nav className="flex flex-row justify-around py-2 px-4 bg-white-200 relative gap-4 shadow-xl z-50">
 
 
       <div className="flex items-center flex-grow w-1/12">
-        <Link href="/">
+        {/* <Link href="/"> */}
           <img src="/logo4.png" className="h-12 mr-3" alt="Logo" />
-        </Link>
+        {/* </Link> */}
       </div>
 
-      <form className="relative w-4/12 h-full" onSubmit={submitHandler}>
-        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+<div className="w-6/12 h-full flex justify-center gap-x-6">
+      <form className="relative w-1/2" onSubmit={submitHandler}>
+        <div onClick={submitHandler} className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
           <svg
             aria-hidden="true"
             className="w-5 h-5 text-gray-500 dark:text-gray-400"
@@ -161,12 +182,39 @@ function Navbar({ user }) {
           id="default-search"
           className="block w-full py-3 pl-10 text-sm text-gray-900 border border-gray-300 outline-none rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
           placeholder="Search Laptops, Keyboards..."
-          required
           onChange={e => setKeyword(e.target.value)}
         />
       </form>
 
-      <ul className={`flex w-5/12 items-center justify-end pr-4 ${ !session && loading ? "opacity-0" : "opacity-100"} transition-opacity`}>
+      {
+        
+            <div className="my-auto">
+              <Menu
+                animate={{
+                  mount: { y: 0 },
+                  unmount: { y: 25 },
+                }}
+                >
+                  <MenuHandler>
+                    <Button variant="outlined" size="sm">Select Category</Button>
+                  </MenuHandler>
+                  <MenuList>
+                    {products.length > 0 && distinctCategory.map((category) => (
+                      <MenuItem key={category} onClick={() => router.push(`/search/?category=${category}`)}>{category}</MenuItem>
+                    ))}
+                  </MenuList>
+              </Menu>
+            </div>
+          
+        }
+
+</div>
+      
+
+      <ul className={`flex w-3/12 items-center justify-end pr-4 ${ !session && loading ? "opacity-0" : "opacity-100"} transition-opacity`}>
+
+    
+
         <li>
           <Link href="/">
             <div className="py-2 px-4 text-gray-700 hover:text-blue-500">
@@ -174,13 +222,7 @@ function Navbar({ user }) {
             </div>
           </Link>
         </li>
-        <li>
-          <Link href="/dashboard">
-            <div className="py-2 px-4 text-gray-700 hover:text-blue-500">
-              Dashboard
-            </div>
-          </Link>
-        </li>
+      
         <li>
           <Link href="/cart">
             <div className="py-2 px-4 text-gray-700 hover:text-blue-500">
@@ -199,34 +241,7 @@ function Navbar({ user }) {
           </li>
         )}
 
-        {/* {session && (
-          <li>
-            <Link href="/api/auth/signout">
-              <div
-                onClick={(e) => {
-                  e.preventDefault();
-                  signOut();
-                }}
-                className="py-2 px-4 text-gray-700 hover:text-blue-500"
-              >
-                Sign Out
-              </div>
-            </Link>
-          </li>
-        )} */}
-        {/* {session && (
-          <li>
-            {session?.user && (
-              <div>
-                {session.user.name && (
-                  <div className="py-2 px-4 text-gray-700 hover:text-blue-500 flex flex-col">
-                    <span className="font-bold">{session.user.name.split(" ")[0]}</span>
-                  </div>
-                )}
-              </div>
-            )}
-          </li>
-        )} */}
+    
         {session && (
           <li>
             {session?.user &&  session.user.image &&  session.user.name && (
@@ -238,6 +253,7 @@ function Navbar({ user }) {
             )}
           </li>
         )}
+
       </ul>
     </nav>
   );

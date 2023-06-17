@@ -20,7 +20,6 @@ export default async function handler(req, res) {
                         },
                     },
                     allow_promotion_codes: true,
-                    // 
                     
                 });
 
