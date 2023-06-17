@@ -111,6 +111,29 @@ function ProfileMenu({data}) {
               </MenuItem>
             );
           })}
+
+          <MenuItem
+                key={"Sign Out"}
+                onClick={() => signOut()}
+                className="flex items-center gap-2 rounded hover:bg-red-500/10 focus:bg-red-500/10 active:bg-red-500/10"
+                >
+
+          {React.createElement(PowerIcon, {
+                  className: "h-4 w-4 text-red-500",
+                  strokeWidth: 2,
+                })}
+                <Typography
+                  as="span"
+                  variant="small"
+                  className="font-normal"
+                  color={"red"}
+                >
+                  Sign Out
+            </Typography>
+
+            </MenuItem>
+                    
+                
         </MenuList>
       </Menu>
  
@@ -213,6 +236,13 @@ function Navbar({ user }) {
 
       <ul className={`flex w-3/12 items-center justify-end pr-4 ${ !session && loading ? "opacity-0" : "opacity-100"} transition-opacity`}>
 
+      <li>
+          <Link href="/developer">
+            <div className="py-2 px-4 text-gray-700 hover:text-blue-500">
+              Developer
+            </div>
+          </Link>
+        </li>
     
 
         <li>
@@ -222,6 +252,8 @@ function Navbar({ user }) {
             </div>
           </Link>
         </li>
+
+      
       
         <li>
           <Link href="/cart">

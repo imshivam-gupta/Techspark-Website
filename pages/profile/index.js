@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
-import { fetchuserdata } from "../store/user-actions";
+import { fetchuserdata } from "../../store/user-actions";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
@@ -42,7 +42,7 @@ const Profile = () => {
   } = userState;
 
   useEffect(() => {
-    if (email === "") dispatch(fetchuserdata(session?.user?.email)), [dispatch];
+    if (email === "" || image==="" || name==="") dispatch(fetchuserdata(session?.user?.email)), [dispatch];
   });
 
   return (
@@ -110,7 +110,7 @@ const Profile = () => {
 
     <div className="grid grid-cols-2 gap-x-3 gap-y-2 w-4/6">
 
-      <Card className="mt-6 w-96 cursor-pointer" onClick={()=> router.push("/my-orders")}>
+      <Card className="mt-6 hover:shadow-xl w-96 cursor-pointer" onClick={()=> router.push("/my-orders")}>
       <CardBody>
         
         <div className="flex flex-row gap-x-4">
@@ -128,7 +128,7 @@ const Profile = () => {
 
 
 
-      <Card className="mt-6 w-96 cursor-pointer" onClick={()=> router.push("/security")}>
+      <Card className="mt-6 hover:shadow-xl w-96 cursor-pointer" onClick={()=> router.push("/security")}>
       <CardBody>
         
         <div className="flex flex-row gap-x-4">
@@ -144,7 +144,7 @@ const Profile = () => {
       </CardBody>
     </Card>
      
-      <Card className="mt-6 w-96 cursor-pointer" onClick={()=>router.push("/edit-profile")}>
+      <Card className="mt-6 hover:shadow-xl w-96 cursor-pointer" onClick={()=>router.push("/edit-profile")}>
       <CardBody>
         
         <div className="flex flex-row gap-x-4">
@@ -160,7 +160,7 @@ const Profile = () => {
       </CardBody>
     </Card>
      
-      <Card className="mt-6 w-96 cursor-pointer" onClick={()=>router.push("/developer")}>
+      <Card className="mt-6 hover:shadow-xl w-96 cursor-pointer" onClick={()=>router.push("/developer")}>
       <CardBody>
         
         <div className="flex flex-row gap-x-4">
