@@ -175,14 +175,14 @@ function Navbar({ user }) {
     <nav className="flex flex-row justify-around py-2 px-4 bg-white-200 relative gap-4 shadow-xl z-50">
 
 
-      <div className="flex items-center flex-grow w-1/12">
+      <div className="items-center flex-grow w-1/12 hidden md:flex">
         {/* <Link href="/"> */}
           <img src="/logo4.png" className="h-12 mr-3" alt="Logo" />
         {/* </Link> */}
       </div>
 
-<div className="w-6/12 h-full flex justify-center gap-x-6">
-      <form className="relative w-1/2" onSubmit={submitHandler}>
+<div className="w-full lg:w-6/12 h-full flex justify-center gap-x-6">
+      <form className="relative w-full lg:w-1/2" onSubmit={submitHandler}>
         <div onClick={submitHandler} className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
           <svg
             aria-hidden="true"
@@ -211,7 +211,7 @@ function Navbar({ user }) {
 
       {
         
-            <div className="my-auto">
+            <div className="my-auto hidden lg:block">
               <Menu
                 animate={{
                   mount: { y: 0 },
@@ -236,7 +236,7 @@ function Navbar({ user }) {
 
       <ul className={`flex w-3/12 items-center justify-end pr-4 ${ !session && loading ? "opacity-0" : "opacity-100"} transition-opacity`}>
 
-      <li>
+      <li className="hidden lg:block">
           <Link href="/developer">
             <div className="py-2 px-4 text-gray-700 hover:text-blue-500">
               Developer
@@ -245,7 +245,7 @@ function Navbar({ user }) {
         </li>
     
 
-        <li>
+        <li className="hidden lg:block">
           <Link href="/">
             <div className="py-2 px-4 text-gray-700 hover:text-blue-500">
               Home
@@ -255,7 +255,7 @@ function Navbar({ user }) {
 
       
       
-        <li>
+        <li className="hidden lg:block">
           <Link href="/cart">
             <div className="py-2 px-4 text-gray-700 hover:text-blue-500">
               Cart
