@@ -1,12 +1,52 @@
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import {  useRouter } from "next/router";
+import { useDispatch } from "react-redux";
+import { cartActions } from "../store/cart-slice";
 
 const Product = ({ product }) => {
   const router = useRouter();
   const { data: session, status } = useSession();
 
-  const addToCartHandler = async (id) => {
+  // const addToCartHandler = async (id) => {
+  //   if (session) {
+  //     await fetch("/api/cart", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         user_email: session.user.email,
+  //       },
+  //       body: JSON.stringify({
+  //         productId: id,
+  //         qty: 1,
+  //       }),
+  //     })
+  //       .then((res) => res.json())
+  //       .then((data) => {
+  //         if (data) {
+  //           router.push("/cart");
+  //         }
+  //       });
+  //   } else {
+  //     router.push("/login");
+  //   }
+  // };
+
+  // https://techspark.vercel.app/api/auth/callback/google
+
+  const dispatch = useDispatch();
+
+  const addToCartHandler = async () => {
+    const prod = {
+      productId:product._id,
+      productName:product.name,
+      productPrice:product.price,
+      productImage:product.main_image,
+      qty:1,
+      countInStock:product.countInStock,
+    }
+    dispatch(cartActions.addItemToCart(prod))
+    router.push("/cart");
     if (session) {
       await fetch("/api/cart", {
         method: "POST",
@@ -15,21 +55,14 @@ const Product = ({ product }) => {
           user_email: session.user.email,
         },
         body: JSON.stringify({
-          productId: id,
+          productId: product._id,
           qty: 1,
         }),
       })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data) {
-            router.push("/cart");
-          }
-        });
-    } else {
-      router.push("/login");
-    }
+    } 
   };
 
+  
   return (
     <div className="w-72 bg-white shadow-2xl rounded-xl duration-500 border hover:scale-105 hover:shadow-xl mb-4">
       <Link href={`product/${product._id}`}>

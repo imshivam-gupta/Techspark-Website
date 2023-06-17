@@ -25,7 +25,7 @@ export const authOptions = {
         
         await dbConnect();
 
-        console.log(credentials);
+        // console.log(credentials);
 
         const temp = await User.findOne({
           email: credentials.email,

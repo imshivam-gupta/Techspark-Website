@@ -2,10 +2,11 @@
 import User from "../../../models/user";
 const bcrypt = require("bcryptjs");
 import dbConnect from "../../../lib/dbconnect";
+import mongoose from "mongoose";
 
 export default async function handler(req, res) {
   const method = req.method;
-  
+  await mongoose.connect(process.env.DB_URL)
   let client;
 
   try{
@@ -16,7 +17,7 @@ export default async function handler(req, res) {
         break;
   
       case "POST":
-        await dbConnect();
+
         const { name, email, password } = req.body;
         const UserExists = await User.findOne({ email: email });
   

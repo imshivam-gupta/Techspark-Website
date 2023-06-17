@@ -24,7 +24,6 @@ export default async function handler(req, res) {
             const cart = await Cart.findOne({ user: user._id });
             const productId  = req.query.prodid;     
             const id = new mongoose.Types.ObjectId(productId);
-            // console.log(id);
             const product = await Product.findOne({ _id: id });
             if (!product){
               res
@@ -37,10 +36,10 @@ export default async function handler(req, res) {
                 (p) => p.productId.toString() === productId.toString()
               );
 
-               console.log(cart);
+              //  console.log(cart);
               if (itemIndex > -1) {
                 cart.items.splice(itemIndex, 1);
-                console.log(cart);
+                // console.log(cart);
             }
     
               await cart.save();

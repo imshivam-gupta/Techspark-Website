@@ -9,10 +9,8 @@ export default async function handler(req, res) {
   
     switch (method) {
         case 'GET':
-            
             await mongoose.connect(process.env.DB_URL);
             try {
-                
                 const prodId = req.query.productid;
                 const objectId = new ObjectId(prodId);
                 const product = await Product.findOne({_id: objectId});
