@@ -34,9 +34,9 @@ const Shipping = ({ cart }) => {
 
   useEffect(() => {
     const fetchStates = () => {
-      console.log(selectedCountry);
+      // console.log(selectedCountry);
       const allStates = State.getStatesOfCountry(selectedCountry.isoCode);
-      console.log(allStates);
+      // console.log(allStates);
       setStates(allStates);
     };
 
@@ -45,7 +45,7 @@ const Shipping = ({ cart }) => {
 
   useEffect(() => {
    
-    console.log(selectedCountry.isoCode,selectedState.isoCode)
+    // console.log(selectedCountry.isoCode,selectedState.isoCode)
     const fetchCities = () => {
       const allCities = City.getCitiesOfState(
         selectedCountry.isoCode,
