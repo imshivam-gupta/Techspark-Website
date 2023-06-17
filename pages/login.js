@@ -31,7 +31,7 @@ function LoginPage() {
   const onSubmitLocal = async (e) => {
     e.preventDefault();
 
-    console.log(email,pass);
+    // console.log(email,pass);
 
     const status = await signIn("credentials", {
       email,

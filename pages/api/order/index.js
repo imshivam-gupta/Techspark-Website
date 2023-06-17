@@ -4,9 +4,11 @@ import Order from "../../../models/order";
 
 export default async function handler(req, res) {
   try {
+    
     const { method } = req;
+    // await dbco
     await mongoose.connect(process.env.DB_URL);
-    console.log(req.body);
+
     switch (method) {
       case "GET":
         break;
@@ -15,8 +17,6 @@ export default async function handler(req, res) {
         try {
           const user_email = req.headers.user_email;
           const temp = await User.findOne({ email: user_email });
-
-          
 
           const {
             items,
