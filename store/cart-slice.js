@@ -41,15 +41,20 @@ const cartSlice = createSlice({
             qty: newItem.qty,
             countInStock: newItem.countInStock,
         });
+        const cartTotal = state.items.reduce((total, item) => total + item.qty * item.productPrice, 0);
+        state.totalCost = cartTotal;
       } 
       else {
         existingItem.qty=newItem.qty;
-        state.totalCost = state.totalCost + existingItem.productPrice;
+        const cartTotal = state.items.reduce((total, item) => total + item.qty * item.productPrice, 0);
+        state.totalCost = cartTotal;
       }
     },
     removeItemFromCart(state, action) {
         const newItemId = action.payload;
         state.items = state.items.filter((item) => item.productId !== newItemId);
+        const cartTotal = state.items.reduce((total, item) => total + item.qty * item.productPrice, 0);
+        state.totalCost = cartTotal;
     },
   },
 });

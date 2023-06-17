@@ -54,6 +54,82 @@ export default function Search() {
   } = router.query;
 
 
+  const [active, setActive] = useState(page);
+  const [activeCateg, setActiveCateg] = useState(category);
+  const [activeBrand, setActiveBrand] = useState(brand);
+  const [activeSort, setActiveSort] = useState(sort);
+  const [activeRating, setActiveRating] = useState(rating);
+  const [activePrice, setActivePrice] = useState(price);
+
+
+  let productlist = products
+  .filter((product) => product.brand === activeBrand || activeBrand === "all")
+  .filter((product) => product.category === activeCateg || activeCateg === "all")
+  .filter((product) => product.rating >= activeRating || activeRating === "all")
+  .filter((product) => product.price >= activePrice.split("-")[0] && product.price <= activePrice.split("-")[1] || activePrice === "all")
+  .filter((product) => {
+    const regex = new RegExp(`.*${query}.*`, "i");
+    return regex.test(product.name) || query==="all"
+  })
+  .sort((a, b) => {
+    if (sort === "featured") {
+      return a.isFeatured === true ? -1 : 1;
+    } else if (sort === "lowest") {
+      return a.price - b.price;
+    } else if (sort === "highest") {
+      return b.price - a.price;
+    } else if (sort === "toprated") {
+      return b.rating - a.rating;
+    } else if (sort === "newest") {
+      return b.createdAt - a.createdAt;
+    } else {
+      return b.createdAt - a.createdAt;
+    }
+  })
+  .slice((active - 1) * 9, active * 9)
+
+
+
+  useEffect(() => {
+    // console.log(router.query)
+    if (router.query.page) setActive(router.query.page); else setActive(1);
+    if (router.query.category) setActiveCateg(router.query.category); else setActiveCateg("all");
+    if (router.query.brand) setActiveBrand(router.query.brand); else setActiveBrand("all");
+    if (router.query.sort) setActiveSort(router.query.sort); else setActiveSort("featured");
+    if (router.query.rating) setActiveRating(router.query.rating);  else setActiveRating("all");
+    if (router.query.price) setActivePrice(router.query.price); else setActivePrice("all");
+
+    productlist = products
+    .filter((product) => product.brand === activeBrand || activeBrand === "all")
+    .filter((product) => product.category === activeCateg || activeCateg === "all")
+    .filter((product) => product.rating >= activeRating || activeRating === "all")
+    .filter((product) => product.price >= activePrice.split("-")[0] && product.price <= activePrice.split("-")[1] || activePrice === "all")
+    .filter((product) => {
+      const regex = new RegExp(`.*${query}.*`, "i");
+      return regex.test(product.name) || query==="all"
+    })
+    .sort((a, b) => {
+      if (sort === "featured") {
+        return a.isFeatured === true ? -1 : 1;
+      } else if (sort === "lowest") {
+        return a.price - b.price;
+      } else if (sort === "highest") {
+        return b.price - a.price;
+      } else if (sort === "toprated") {
+        return b.rating - a.rating;
+      } else if (sort === "newest") {
+        return b.createdAt - a.createdAt;
+      } else {
+        return b.createdAt - a.createdAt;
+      }
+    })
+    .slice((active - 1) * 9, active * 9)
+
+
+  }, [router.query]);
+
+
+
   const filterSearch = ({ page, category, brand, sort, min, max, searchQuery, price, rating,}) => {
     const { query } = router;
     if (page) query.page = page;
@@ -73,13 +149,7 @@ export default function Search() {
 
   };
 
-  const [active, setActive] = useState(page);
-  const [activeCateg, setActiveCateg] = useState(category);
-  const [activeBrand, setActiveBrand] = useState(brand);
-  const [activeSort, setActiveSort] = useState(sort);
-  const [activeRating, setActiveRating] = useState(rating);
-  const [activePrice, setActivePrice] = useState(price);
-
+ 
   const pages = Math.ceil(products.length / 9);
 
   const categoryHandler = (e) => {
@@ -138,35 +208,8 @@ export default function Search() {
   };
   
 
-  const productlist = products
-  .filter((product) => product.brand === activeBrand || activeBrand === "all")
-  .filter((product) => product.category === activeCateg || activeCateg === "all")
-  .filter((product) => product.rating >= activeRating || activeRating === "all")
-  .filter((product) => product.price >= activePrice.split("-")[0] && product.price <= activePrice.split("-")[1] || activePrice === "all")
-  .filter((product) => {
-    const regex = new RegExp(`.*${query}.*`, "i");
-    return regex.test(product.name) || query==="all"
-  })
-  .sort((a, b) => {
-    if (sort === "featured") {
-      return a.isFeatured === true ? -1 : 1;
-    } else if (sort === "lowest") {
-      return a.price - b.price;
-    } else if (sort === "highest") {
-      return b.price - a.price;
-    } else if (sort === "toprated") {
-      return b.rating - a.rating;
-    } else if (sort === "newest") {
-      return b.createdAt - a.createdAt;
-    } else {
-      return b.createdAt - a.createdAt;
-    }
-  })
-  .slice((active - 1) * 9, active * 9)
-
-
-
-  console.log(productlist)
+ 
+  
 
   return (
     <>
@@ -220,6 +263,10 @@ export default function Search() {
                 ))}
             </Select>
           </div>
+
+
+
+
           <div className="mb-3">
             <Select
               className="w-full"
@@ -228,21 +275,25 @@ export default function Search() {
               label="Select Rating"
             >
               <Option value="all">All</Option>
-              {ratings &&
-                ratings.map((rating) => (
+
+              {ratings && ratings.map((rating) => (
                   <Option key={rating} value={rating}>
                     {rating} star{rating > 1 && "s"} & up
                   </Option>
                 ))}
+
             </Select>
           </div>
+
+
+
         </div>
 
 
         <div className="md:col-span-3 w-9/12">
           <div className="mb-2 flex items-center justify-between border-b-2 pb-2">
             <div className="flex items-center">
-              {products.length === 0 ? "No" : products.length} Results
+              {productlist.length === 0 ? "No" : productlist.length} Results
               {query !== "all" && query !== "" && " : " + query}
               {category !== "all" && " : " + category}
               {brand !== "all" && " : " + brand}

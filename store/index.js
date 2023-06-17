@@ -3,6 +3,7 @@ import  {configureStore,createSlice} from "@reduxjs/toolkit";
 import { createWrapper } from "next-redux-wrapper";
 import cartSlice from "./cart-slice";
 import productsSlice from "./products-slice";
+import userSlice from "./user-slice";
 
 // const initialState = {
 //     count: 0,
@@ -58,7 +59,8 @@ const store = configureStore({
         counter: counterSlice.reducer,
         other: otherSlice.reducer,
         products: productsSlice.reducer,
-        cart: cartSlice.reducer
+        cart: cartSlice.reducer,
+        user: userSlice.reducer
     }
 });
 

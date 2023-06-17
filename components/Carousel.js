@@ -8,7 +8,6 @@ export default function ProductCarousel({products}) {
 
   const tempcopy = products
   const topRatedProducts = tempcopy.slice().sort((a, b) => b.rating - a.rating).slice(0, 5);
-  console.log(topRatedProducts)
 
   const router = useRouter();
 
@@ -30,7 +29,7 @@ export default function ProductCarousel({products}) {
         <IconButton
           variant="text"
           color="white"
-          size="xl"
+          size="lg"
           onClick={handlePrev}
           className="!absolute top-2/4 -translate-y-2/4 left-4"
         >
@@ -41,7 +40,7 @@ export default function ProductCarousel({products}) {
         <IconButton
           variant="text"
           color="white"
-          size="xl"
+          size="lg"
           onClick={handleNext}
           className="!absolute top-2/4 -translate-y-2/4 !right-4"
         >

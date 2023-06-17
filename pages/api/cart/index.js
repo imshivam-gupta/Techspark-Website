@@ -4,28 +4,34 @@ import mongoose from "mongoose";
 import User from "../../../models/user";
 
 export default async function handler(req, res) {
- 
+
 
   try {
+
     const { method } = req;
-    const user_email = req.headers.user_email;
-    await mongoose.connect(process.env.DB_URL);
+    await mongoose.connect(process.env.DB_URL)
 
     switch (method) {
         case "GET":
           try {
-            const user = User.findOne({ email: user_email });
-            const cart = await Cart.findOne({ user :user._id });
+
+            const user_email = req.headers.user_email;
+            // console.log(user_email)
+            const cart = await Cart.findOne({ user_email :user_email });
+
             if (cart) {
               const ans = await cart.populate("items.productId");
               res.status(200).json({ cart });
-            } else {
-              res
-                .status(200)
-                .json({ success: false, message: "Cart does not exist" });
+            } 
+
+            else {
+              res.status(400).json({ success: false, message: "Cart does not exist" });
             }
-          } catch (err) {
-            console.log(err);
+
+          } 
+          
+          catch (err) {
+            // console.log("error aaga");
             res
               .status(500)
               .json({ success: false, message: "Internal Server Error" });
@@ -35,10 +41,9 @@ export default async function handler(req, res) {
     
         case "POST":
           try {
-            const user = User.findOne({ email: user_email });
-            const cart = await Cart.findOne({ user: user._id });
 
-            
+            const user_email = req.headers.user_email;
+            const cart = await Cart.findOne({ user_email: user_email });
             const { productId, qty } = req.body;
             const product = await Product.findOne({ _id: productId });
 
@@ -46,7 +51,8 @@ export default async function handler(req, res) {
               res
                 .status(404)
                 .json({ success: false, message: "Product not found" });
-    
+            
+                
             if (cart) {
               const itemIndex = cart.items.findIndex(
                 (p) => p.productId.toString() === productId.toString()
@@ -63,17 +69,18 @@ export default async function handler(req, res) {
               await cart.save();
               const ans = await cart.populate("items.productId");
               res.status(200).json({ success: true, cart: ans });
+
             } else {
               const newCart = await Cart.create({
                 items: [{ productId, qty }],
-                user: user._id,
+                user_email: user_email,
               });
     
               const ans = await newCart.populate("items.productId");
               res.status(200).json({ success: true, cart: ans });
             }
           } catch (error) {
-            console.log(error);
+            // console.log("connection hi hoga");
             res
               .status(500)
               .json({ success: false, message: "Internal Server Error" });
@@ -87,7 +94,7 @@ export default async function handler(req, res) {
   } catch (error) {
     console.log(error);
   } finally {
-    mongoose.connection.close();
+    // mongoose.connection.close();
   }
 
   

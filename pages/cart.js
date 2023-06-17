@@ -17,19 +17,28 @@ const CartScreen = () => {
   const prodStateRedux = useSelector((state) => state.products);
   const { products } = prodStateRedux;
 
-  useEffect(() => {
-    if (products.length === 0) dispatch(fetchProductData());
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (session && loading) dispatch(fetchCartData(session.user.email));
-  }, [dispatch, session]);
-
   const router = useRouter();
 
+  // console.log(status)
   if (status !== "loading" && !session) {
     router.push("/login");
   }
+
+  useEffect(() => {
+    if (products.length === 0) {
+      dispatch(fetchProductData());
+    }
+   
+  }, [dispatch]);
+
+  const user_email = session?.user?.email;
+
+  useEffect(() => {
+    if (user_email && loading) dispatch(fetchCartData(user_email));
+  }, [dispatch,session]);
+
+
+
 
   const shiftHandler = () => {
     router.push("/shipping");
@@ -79,9 +88,6 @@ const CartScreen = () => {
     }
   };
 
-  if (loading) {
-    return <div>Loading</div>;
-  }
 
   return (
     <>
