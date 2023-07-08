@@ -10,7 +10,8 @@ import { BACKEND_URL } from "../utils/dbconnect";
 
 
 const CartScreen = () => {
-
+  
+  console.log(localStorage.getItem("token"));
   const router = useRouter(); 
   const dispatch = useDispatch();
   const cartStateRedux = useSelector((state) => state.cart);

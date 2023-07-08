@@ -14,12 +14,14 @@ import { useDispatch } from "react-redux";
 
 
 function LoginPage() {
-
+  console.log(localStorage.getItem("token"));
   const dispatch = useDispatch();
   const router = useRouter();
   let isAuthenticated = false;
   if(localStorage.getItem("token")!=='null') isAuthenticated=true;
   if(isAuthenticated) router.push("/");
+
+
 
   const showToast = () =>
     toast("Incorrect Credentials. Try again or register yourself", {
