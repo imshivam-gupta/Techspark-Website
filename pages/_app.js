@@ -36,7 +36,6 @@ export default function App({
   const router = useRouter();
 
   const handleBack = () => {
-    console.log("back");
     router.back();
   };
 

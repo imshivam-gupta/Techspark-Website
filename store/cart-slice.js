@@ -12,24 +12,24 @@ const cartSlice = createSlice({
   reducers: {
 
     replaceCart(state, action) {
-        const cart_res = action.payload.data;
+        const cart_res = action.payload.data.cart;
         const cartTotal = cart_res.items.reduce((total, item) => total + item.qty * item.productId.price, 0);
         state.totalCost = cartTotal;
-        state._id = cart_res._id.toString();
+        state._id = cart_res._id;
         state.items = cart_res.items.map((item) => ({
             productId: item.productId._id,
-            productName: item.productId.name,
+            productName: item.productId.title,
             productPrice: item.productId.price,
-            productImage: item.productId.main_image,
+            productImage: item.productId.image,
             qty: item.qty,
-            countInStock: item.productId.countInStock,
+            countInStock: item.productId.count_in_stock,
         }));
         state.loading = false;
+        state.changed = true;
     },
 
     addItemToCart(state, action) {
         const newItem = action.payload;
-        console.log(newItem)
 
       const existingItem = state.items.find((item) => item.productId === newItem.productId);
       if (!existingItem) {

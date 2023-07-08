@@ -1,72 +1,59 @@
-import { useSession } from "next-auth/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
-import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCartData } from "../store/cart-actions";
 import { cartActions } from "../store/cart-slice";
 import { fetchProductData } from "../store/products-actions";
+import dynamic from "next/dynamic";
+import { BACKEND_URL } from "../utils/dbconnect";
+
 
 const CartScreen = () => {
-  const { data: session, status } = useSession();
+
+  const router = useRouter(); 
   const dispatch = useDispatch();
   const cartStateRedux = useSelector((state) => state.cart);
-  const { _id, totalCost, items, changed, loading } = cartStateRedux;
-
   const prodStateRedux = useSelector((state) => state.products);
-  const { products } = prodStateRedux;
 
-  const router = useRouter();
+  let isAuthenticated = true;
+  if(localStorage.getItem("token")==='null') isAuthenticated = false;
 
-  // console.log(status)
-  if (status !== "loading" && !session) {
+  if (!isAuthenticated) {
     router.push("/login");
   }
 
+
   useEffect(() => {
-    if (products.length === 0) {
+    if (prodStateRedux.products.length === 0) {
       dispatch(fetchProductData());
     }
-   
   }, [dispatch]);
 
-  const user_email = session?.user?.email;
-
   useEffect(() => {
-    if (user_email && loading) dispatch(fetchCartData(user_email));
-  }, [dispatch,session]);
+    if (isAuthenticated === true && cartStateRedux.changed === false) {
+      dispatch(fetchCartData());
+    }
+  }, [dispatch, isAuthenticated]);
 
-
-
-
+  
   const shiftHandler = () => {
     router.push("/shipping");
   };
 
-  const addToCartHandler = async (
-    productId,
-    productName,
-    productPrice,
-    productImage,
-    qty,
-    countInStock
-  ) => {
-    const prod = {
-      productId,
-      productName,
-      productPrice,
-      productImage,
-      qty,
-      countInStock,
-    };
+  const { totalCost, items, loading } = cartStateRedux;
+
+
+  const addToCartHandler = async ( productId, productName, productPrice, productImage, qty,countInStock) => {
+    const prod = { productId, productName, productPrice, productImage, qty, countInStock };
     dispatch(cartActions.addItemToCart(prod));
-    if (session) {
-      await fetch("/api/cart", {
+    if (isAuthenticated) {
+      const token = localStorage.getItem("token");
+      await fetch(`${BACKEND_URL}api/v1/cart/item`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          user_email: session.user.email,
+          "authorization": `Bearer ${token}`,
         },
         body: JSON.stringify({
           productId: productId,
@@ -76,16 +63,19 @@ const CartScreen = () => {
     }
   };
 
-  const deleteHandler = (id) => {
+  const deleteHandler = async (id) => {
+    const token = localStorage.getItem("token");
     dispatch(cartActions.removeItemFromCart(id));
-    if (session) {
-      fetch(`/api/cart/${id}`, {
-        method: "DELETE",
-        headers: {
-          user_email: session.user.email,
-        },
-      });
-    }
+
+    const res = await fetch(`${BACKEND_URL}api/v1/cart/item/${id}`, {
+      method: "DELETE",
+      headers: {
+        "content-type": "application/json",
+        "authorization": `Bearer ${token}`,
+      },
+    });
+
+    const data = await res.json();
   };
 
 
@@ -102,44 +92,44 @@ const CartScreen = () => {
             {loading ? (
               <div
                 role="status"
-                class="w-3/4 p-4 space-y-4 border border-gray-200 divide-y divide-gray-200 rounded shadow animate-pulse dark:divide-gray-700 md:p-6 dark:border-gray-700"
+                className="w-3/4 p-4 space-y-4 border border-gray-200 divide-y divide-gray-200 rounded shadow animate-pulse dark:divide-gray-700 md:p-6 dark:border-gray-700"
               >
-                <div class="flex items-center justify-between">
+                <div className="flex items-center justify-between">
                   <div>
-                    <div class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-24 mb-2.5"></div>
-                    <div class="w-32 h-2 bg-gray-200 rounded-full dark:bg-gray-700"></div>
+                    <div className="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-24 mb-2.5"></div>
+                    <div className="w-32 h-2 bg-gray-200 rounded-full dark:bg-gray-700"></div>
                   </div>
-                  <div class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-700 w-12"></div>
+                  <div className="h-2.5 bg-gray-300 rounded-full dark:bg-gray-700 w-12"></div>
                 </div>
-                <div class="flex items-center justify-between pt-4">
+                <div className="flex items-center justify-between pt-4">
                   <div>
-                    <div class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-24 mb-2.5"></div>
-                    <div class="w-32 h-2 bg-gray-200 rounded-full dark:bg-gray-700"></div>
+                    <div className="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-24 mb-2.5"></div>
+                    <div className="w-32 h-2 bg-gray-200 rounded-full dark:bg-gray-700"></div>
                   </div>
-                  <div class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-700 w-12"></div>
+                  <div className="h-2.5 bg-gray-300 rounded-full dark:bg-gray-700 w-12"></div>
                 </div>
-                <div class="flex items-center justify-between pt-4">
+                <div className="flex items-center justify-between pt-4">
                   <div>
-                    <div class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-24 mb-2.5"></div>
-                    <div class="w-32 h-2 bg-gray-200 rounded-full dark:bg-gray-700"></div>
+                    <div className="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-24 mb-2.5"></div>
+                    <div className="w-32 h-2 bg-gray-200 rounded-full dark:bg-gray-700"></div>
                   </div>
-                  <div class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-700 w-12"></div>
+                  <div className="h-2.5 bg-gray-300 rounded-full dark:bg-gray-700 w-12"></div>
                 </div>
-                <div class="flex items-center justify-between pt-4">
+                <div className="flex items-center justify-between pt-4">
                   <div>
-                    <div class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-24 mb-2.5"></div>
-                    <div class="w-32 h-2 bg-gray-200 rounded-full dark:bg-gray-700"></div>
+                    <div className="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-24 mb-2.5"></div>
+                    <div className="w-32 h-2 bg-gray-200 rounded-full dark:bg-gray-700"></div>
                   </div>
-                  <div class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-700 w-12"></div>
+                  <div className="h-2.5 bg-gray-300 rounded-full dark:bg-gray-700 w-12"></div>
                 </div>
-                <div class="flex items-center justify-between pt-4">
+                <div className="flex items-center justify-between pt-4">
                   <div>
-                    <div class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-24 mb-2.5"></div>
-                    <div class="w-32 h-2 bg-gray-200 rounded-full dark:bg-gray-700"></div>
+                    <div className="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-24 mb-2.5"></div>
+                    <div className="w-32 h-2 bg-gray-200 rounded-full dark:bg-gray-700"></div>
                   </div>
-                  <div class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-700 w-12"></div>
+                  <div className="h-2.5 bg-gray-300 rounded-full dark:bg-gray-700 w-12"></div>
                 </div>
-                <span class="sr-only">Loading...</span>
+                <span className="sr-only">Loading...</span>
               </div>
             ) : items.length === 0 ? (
               <div className="w-3/4 px-6  rounded-lg ">
@@ -250,21 +240,21 @@ const CartScreen = () => {
             {loading ? (
               <div
                 role="status"
-                class="w-1/4 px-6 ml-8 border border-gray-200 rounded shadow animate-pulse md:p-6 dark:border-gray-700"
+                className="w-1/4 px-6 ml-8 border border-gray-200 rounded shadow animate-pulse md:p-6 dark:border-gray-700"
               >
-                <div class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-48 mb-4"></div>
+                <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-48 mb-4"></div>
                 
-                <div class="h-4 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"></div>
-                <div class="h-4 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"></div>
-                <div class="h-4 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"></div>
-                <div class="h-4 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"></div>
-                <div class="h-4 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"></div>
-                <div class="h-4 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"></div>
-                <div class="h-4 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"></div>
-                <div class="h-4 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"></div>
-                <div class="h-4 bg-gray-200 rounded-full dark:bg-gray-700"></div>
+                <div className="h-4 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"></div>
+                <div className="h-4 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"></div>
+                <div className="h-4 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"></div>
+                <div className="h-4 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"></div>
+                <div className="h-4 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"></div>
+                <div className="h-4 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"></div>
+                <div className="h-4 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"></div>
+                <div className="h-4 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"></div>
+                <div className="h-4 bg-gray-200 rounded-full dark:bg-gray-700"></div>
 
-                <span class="sr-only">Loading...</span>
+                <span className="sr-only">Loading...</span>
               </div>
             ) : (
               <div className="w-1/4 px-6 mt-6">
@@ -300,4 +290,5 @@ const CartScreen = () => {
   );
 };
 
-export default CartScreen;
+
+export default dynamic(() => Promise.resolve(CartScreen), {ssr: false})

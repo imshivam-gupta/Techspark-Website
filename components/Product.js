@@ -1,39 +1,18 @@
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import {  useRouter } from "next/router";
-import { useDispatch } from "react-redux";
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { cartActions } from "../store/cart-slice";
+import { BACKEND_URL } from "../utils/dbconnect";
 
 const Product = ({ product }) => {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const user = useSelector((state) => state.user);
+  const[isAuthenticated,setIsAuthenticated] = useState(false);
+  if(user.email!=="" && !isAuthenticated) setIsAuthenticated(true); 
 
-  // const addToCartHandler = async (id) => {
-  //   if (session) {
-  //     await fetch("/api/cart", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         user_email: session.user.email,
-  //       },
-  //       body: JSON.stringify({
-  //         productId: id,
-  //         qty: 1,
-  //       }),
-  //     })
-  //       .then((res) => res.json())
-  //       .then((data) => {
-  //         if (data) {
-  //           router.push("/cart");
-  //         }
-  //       });
-  //   } else {
-  //     router.push("/login");
-  //   }
-  // };
-
-  // https://techspark.vercel.app/api/auth/callback/google
-
+  
   const dispatch = useDispatch();
 
   const addToCartHandler = async () => {
@@ -47,18 +26,21 @@ const Product = ({ product }) => {
     }
     dispatch(cartActions.addItemToCart(prod))
     router.push("/cart");
-    if (session) {
-      await fetch("/api/cart", {
+    const token = localStorage.getItem("token");
+
+    if (isAuthenticated) {
+      const res = await fetch(`${BACKEND_URL}api/v1/cart/item`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          user_email: session.user.email,
+          authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           productId: product._id,
           qty: 1,
         }),
-      })
+      }).then((res) => res.json());
+
     } 
   };
 

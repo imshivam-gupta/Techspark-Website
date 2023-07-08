@@ -1,30 +1,27 @@
 import { cartActions } from './cart-slice';
 import axios from 'axios';
+import { BACKEND_URL } from '../utils/dbconnect';
 
-export const fetchCartData = (email) => {
+export const fetchCartData = () => {
   return async (dispatch) => {
     const fetchData = async () => {
-      console.log(email)
+      const token = localStorage.getItem("token");
       const response = await axios.get(
-        `/api/cart`,
+        `${BACKEND_URL}api/v1/cart`,
         {headers: {
           "Content-Type": "application/json",
-          user_email: email,
-        },}
+          "authorization": `Bearer ${token}`,
+        }}
       ).catch((err) => {
         console.log(err);
       });
 
-      const data = await response.data;
-      console.log(data);
-      return data.cart;
+      const data = await response.data.data;
+      return data;
     };
 
     try {
-      // console.log("fetching cart data started")
       const cartData = await fetchData();
-      console.log(cartData);
-      // console.log("fetching cart data finished")
       dispatch(
         cartActions.replaceCart({
           data:cartData,

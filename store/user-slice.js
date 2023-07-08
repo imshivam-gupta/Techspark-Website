@@ -17,17 +17,15 @@ const userSlice = createSlice({
     },
     reducers: {
         replaceUser(state, action) {
-            // console.log(action.payload)
-            const user= action.payload.data.data
-            state.name = user.name || "";
-            state.email = user.email || "";
-            state.phone = user.phone || "";
-            state.main_address = user.main_address || "";
-            state.addresses = user.addresses || [];
-            state.orders = user.orders || [];
-            state.billing_address = user.billing_address || "";
-            state.image = user.image || "";
-            // state.products = new_state;
+            const user= action.payload;
+            state.name = user?.name || "";
+            state.email = user?.email || "";
+            state.phone = user?.phone || "";
+            state.main_address = user?.main_address || "";
+            state.addresses = user?.addresses || [];
+            state.orders = user?.orders || [];
+            state.billing_address = user?.billing_address || "";
+            state.image = user?.image || "";
             state.loading = false;
         }
     }

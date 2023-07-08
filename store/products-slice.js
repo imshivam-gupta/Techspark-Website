@@ -9,16 +9,15 @@ const productsSlice = createSlice({
     },
     reducers: {
         replaceProducts(state, action) {
-            // console.log(action.payload)
-            const prods= action.payload.items.data
+            const prods= action.payload.items;
             const new_state = prods.map(product => ({
                 _id: product._id.toString(),
-                main_image: product.main_image,
+                main_image: product.image,
                 price: product.price,
-                name: product.name,
+                name: product.title,
                 brand: product.brand,
                 rating: product.rating,
-                images: product.all_images,
+                images: product.other_images,
                 description: product.description,
                 tagline: product.tagline,
                 category: product.category,
@@ -32,7 +31,6 @@ const productsSlice = createSlice({
         }
     }
 });
-
 
 export const productsActions = productsSlice.actions;
 export default productsSlice;

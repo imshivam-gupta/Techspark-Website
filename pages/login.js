@@ -7,9 +7,19 @@ import login_validate from "../lib/validate"
 import { useState } from "react";
 import { HiEye } from "react-icons/hi";
 import { toast } from "react-toastify";
+import { BACKEND_URL } from "../utils/dbconnect";
+import { userActions } from "../store/user-slice";
+import dynamic from "next/dynamic";
+import { useDispatch } from "react-redux";
+
 
 function LoginPage() {
+
+  const dispatch = useDispatch();
   const router = useRouter();
+  let isAuthenticated = false;
+  if(localStorage.getItem("token")!=='null') isAuthenticated=true;
+  if(isAuthenticated) router.push("/");
 
   const showToast = () =>
     toast("Incorrect Credentials. Try again or register yourself", {
@@ -28,20 +38,27 @@ function LoginPage() {
     router.push("/register");
   };
 
+
+  
   const onSubmitLocal = async (e) => {
     e.preventDefault();
-
-    // console.log(email,pass);
-
-    const status = await signIn("credentials", {
-      email,
-      password:pass,
-      redirect: false,
-      callbackUrl: "/",
+    const res = await fetch(`${BACKEND_URL}api/v1/users/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        "email":email,
+        "password":pass,
+      }),
     });
 
-    if(status.ok){
-      router.push(status.url)
+    const data = await res.json();
+    localStorage.setItem("token", data.token);
+    dispatch(userActions.replaceUser( data.data.user));
+
+    if(data.status === "success"){
+      router.push("/");
     } else{
       showToast();
     }
@@ -146,7 +163,7 @@ function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-6 grid grid-cols-3 items-center text-gray-400 w-3/4 mx-auto">
+          {/* <div className="mt-6 grid grid-cols-3 items-center text-gray-400 w-3/4 mx-auto">
             <hr className="border-gray-400" />
             <p className="text-center text-sm">OR</p>
             <hr className="border-gray-400" />
@@ -191,7 +208,7 @@ function LoginPage() {
               <path d="M12,2.2467A10.00042,10.00042,0,0,0,8.83752,21.73419c.5.08752.6875-.21247.6875-.475,0-.23749-.01251-1.025-.01251-1.86249C7,19.85919,6.35,18.78423,6.15,18.22173A3.636,3.636,0,0,0,5.125,16.8092c-.35-.1875-.85-.65-.01251-.66248A2.00117,2.00117,0,0,1,6.65,17.17169a2.13742,2.13742,0,0,0,2.91248.825A2.10376,2.10376,0,0,1,10.2,16.65923c-2.225-.25-4.55-1.11254-4.55-4.9375a3.89187,3.89187,0,0,1,1.025-2.6875,3.59373,3.59373,0,0,1,.1-2.65s.83747-.26251,2.75,1.025a9.42747,9.42747,0,0,1,5,0c1.91248-1.3,2.75-1.025,2.75-1.025a3.59323,3.59323,0,0,1,.1,2.65,3.869,3.869,0,0,1,1.025,2.6875c0,3.83747-2.33752,4.6875-4.5625,4.9375a2.36814,2.36814,0,0,1,.675,1.85c0,1.33752-.01251,2.41248-.01251,2.75,0,.26251.1875.575.6875.475A10.0053,10.0053,0,0,0,12,2.2467Z"></path>
             </svg>
             Login with Github
-          </button>
+          </button> */}
 
           <div className="mt-5 w-3/4 mx-auto text-xs border-b border-[#002D74] py-4 text-[#002D74]">
             <a href="#">Forgot your password?</a>
@@ -224,4 +241,4 @@ function LoginPage() {
   );
 }
 
-export default LoginPage;
+export default dynamic(() => Promise.resolve(LoginPage), {ssr: false});;

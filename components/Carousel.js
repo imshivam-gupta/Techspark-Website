@@ -1,7 +1,5 @@
-import Image from "next/image";
 import { Button, Card, Carousel, IconButton, Rating, Typography } from "@material-tailwind/react";
 import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/24/outline"
-// import { motion } from "framer-motion"
 import { useRouter } from "next/router";
 
 export default function ProductCarousel({products}) {
@@ -16,7 +14,6 @@ export default function ProductCarousel({products}) {
   };
 
 
-  
   return (
     <>
    
@@ -59,7 +56,7 @@ export default function ProductCarousel({products}) {
                 <Typography color="black" variant={"h2"} className="text-2xl lg:text-4xl mt-10 lg:mt-0 text-center opacity-100 brightness-100">
                   {product.name.split(" ").slice(0, 2).join(" ")}  
                 </Typography>
-                <Rating value={product.rating} readonly className="py-2 lg:py-0 mx-auto lg:mx-0"/>
+                {/* <Rating value={product.rating} readonly className="py-2 lg:py-0 mx-auto lg:mx-0"/> */}
               </div>
               
               <Typography color="black" variant={"h4"} className="hidden lg:block text-center opacity-100 brightness-100 my-auto">

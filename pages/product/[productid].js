@@ -336,14 +336,7 @@ const ProductDetails = (props) => {
                           <Typography variant="h5" color="blue-gray">
                               {review.name}
                           </Typography>
-                          <Rating value={review.rating} readonly/>
-                          {/* <div className="5 flex items-center gap-0">
-              <StarIcon className="h-5 w-5 text-yellow-700" />
-              <StarIcon className="h-5 w-5 text-yellow-700" />
-              <StarIcon className="h-5 w-5 text-yellow-700" />
-              <StarIcon className="h-5 w-5 text-yellow-700" />
-              <StarIcon className="h-5 w-5 text-yellow-700" />
-            </div> */}
+                          {/* <Rating value={review.rating} readonly/> */}
                         </div>
               
                       </div>

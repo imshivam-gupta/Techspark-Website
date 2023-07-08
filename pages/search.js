@@ -91,7 +91,6 @@ export default function Search() {
 
 
   useEffect(() => {
-    // console.log(router.query)
     if (router.query.page) setActive(router.query.page); else setActive(1);
     if (router.query.category) setActiveCateg(router.query.category); else setActiveCateg("all");
     if (router.query.brand) setActiveBrand(router.query.brand); else setActiveBrand("all");

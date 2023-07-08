@@ -1,29 +1,30 @@
+import { BACKEND_URL } from "../utils/dbconnect";
 import { userActions } from "./user-slice";
 
-export const fetchuserdata = (user_email) => {
+export const fetchuserdata = () => {
 
     return async (dispatch) => {
         
+        const token = localStorage.getItem("token");
         const fetchData = async () => {
             const response = await fetch(
-                `/api/user/`,{
+                `${BACKEND_URL}api/v1/users/me`,{
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
-                        user_email: user_email,
+                        "authorization": `Bearer ${token}`,
                     },
                 }
             );
             const data = await response.json();
+            console.log(data); 
             return data;
         };
 
         try {
             const userData = await fetchData();
             dispatch(
-                userActions.replaceUser({
-                    data: userData || {},
-                })
+                userActions.replaceUser(userData.data.data)
             );
         } catch (error) {
             console.log(error);
@@ -31,3 +32,4 @@ export const fetchuserdata = (user_email) => {
 
     };
 }
+

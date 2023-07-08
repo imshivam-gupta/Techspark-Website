@@ -1,28 +1,46 @@
-import { getServerSession } from "next-auth";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { authOptions } from "./api/auth/[...nextauth]";
 import { Country, State, City }  from 'country-state-city';
 import axios from "axios";
+import dynamic from "next/dynamic";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchuserdata } from "../store/user-actions";
+import { fetchCartData } from "../store/cart-actions";
+import { BACKEND_URL } from "../utils/dbconnect";
 
-const Shipping = ({ cart }) => {
+const Shipping = () => {
 
+
+  let isAuthenticated = true;
+  if(localStorage.getItem('token')===null) isAuthenticated = false;
+
+  
   const router = useRouter();
-  const { data: session, status } = useSession();
 
   const [email,setEmail]=useState("");
   const [name,setName]=useState("");
   const [address, setAddress] = useState("");
+
+  // Combining all the address fields into one state
   const [selectedCountry, setSelectedCountry] = useState({ name: "India", isoCode: "IN" });
   const [selectedState, setSelectedState] = useState({ name: "Delhi", isoCode: "DL" });
   const [selectedCity, setSelectedCity] = useState("");
   const [postalCode, setPostalCode] = useState("");
+
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
-  const [cartState, setCartState] = useState(cart);
   const [formErrors, setFormErrors] = useState({});
+
+  const dispatch = useDispatch();
+
+  const cartState = useSelector((state) => state.cart);
+  if(cartState.changed===false) dispatch(fetchCartData());
+
+
+  const userState = useSelector((state) => state.user);
+  if(userState.email==="") dispatch(fetchuserdata());
+
 
   useEffect(() => {
     const fetchCountries = () => {
@@ -34,9 +52,7 @@ const Shipping = ({ cart }) => {
 
   useEffect(() => {
     const fetchStates = () => {
-      // console.log(selectedCountry);
       const allStates = State.getStatesOfCountry(selectedCountry.isoCode);
-      // console.log(allStates);
       setStates(allStates);
     };
 
@@ -44,8 +60,6 @@ const Shipping = ({ cart }) => {
   }, [selectedCountry]);
 
   useEffect(() => {
-   
-    // console.log(selectedCountry.isoCode,selectedState.isoCode)
     const fetchCities = () => {
       const allCities = City.getCitiesOfState(
         selectedCountry.isoCode,
@@ -60,43 +74,19 @@ const Shipping = ({ cart }) => {
 
   useEffect(() => {
     const fetchSession = async () => {
-      if (status === "loading" ) return;
-      if (!session) {
+      if (!isAuthenticated) {
         router.push("/login");
       } else {
-        setEmail(session.user && session.user.email);
-        setName(session.user && session.user.name);
+        setEmail(userState.email);
+        setName(userState.name);
       }
     };
 
     fetchSession();
-  }, [session, router]);
+  }, [ router]);
+  
 
-  const redirectToCheckout = async () => {
-    try {
-      const data = await axios.post('/api/checkout', {
-        items: Object.entries(cart.items).map(
-          ([_, { qty,productName,productId,productImage,productPrice }]) => ({
-            price_data:{
-              currency:'INR',
-              product_data:{
-                name: productName,
-                images: [productImage],
-                metadata: { productId: productId},
-              },
-              unit_amount: Number(productPrice)*100,
-            },
-            quantity: Number(qty),
-            tax_rates:['txr_1NFXChSHS6cBSQ8V3ta64dXl'],
-        })),
-      });
-      
-      router.push(data.data.url)
-    } catch (error) {
-      console.log(error)
-    }
 
-  };
 
   const validateForm = () => {
     let errors = {};
@@ -149,21 +139,15 @@ const Shipping = ({ cart }) => {
   };
 
 
-
   const placeOrderHandler = async (e) => {
-    e.preventDefault();
 
+    e.preventDefault();
     const isValidForm = validateForm();
-    if (!isValidForm) {
-      return;
-    }
-  
+    if (!isValidForm)  return;
+    
     try {
-      await axios.post("https://techspark.vercel.app/api/order", {
-        items: cart.items.map((item) => ({
-          productId: item.productId,
-          quantity: item.quantity,
-        })),
+      const token = localStorage.getItem("token");
+      let data = await axios.post(`${BACKEND_URL}api/v1/orders`, {
         shippingAddress: {
           address: address,
           country: selectedCountry.name,
@@ -174,18 +158,27 @@ const Shipping = ({ cart }) => {
       }, {
         headers: {
           "Content-Type": "application/json",
-          "user_email": session.user ? session.user.email : session.data.user.email,
+          "authorization": `Bearer ${token}`,
         },
       });
-  
-      redirectToCheckout();
+
+      const orderId = data.data.data.order._id;
+
+      data = await axios.post(`${BACKEND_URL}api/v1/orders/checkout-session/${orderId}`,{},{ 
+        headers: {
+          "Content-Type": "application/json",
+          "authorization": `Bearer ${token}`,
+        }
+      });
+
+      router.push(data.data.session.url)
+
     } catch (error) {
       console.log(error);
     }
   };
   
 
- 
   return (
     <>
       
@@ -433,57 +426,4 @@ const Shipping = ({ cart }) => {
 
 
 
-
-export const getServerSideProps = async ({ req, res }) => {
-  const session = await getServerSession(req, res, authOptions);
-
-  if (session) {
-    try {
-      const response = await axios.get("https://techspark.vercel.app/api/cart", {
-        headers: {
-          "Content-Type": "application/json",
-          user_email: session.email,
-        },
-      });
-            
-
-    const cart_res = response.data.cart;
-
-    const cartTotal = cart_res && cart_res.items.reduce((total, item) => total + item.qty * item.productId.price,0);
-
-    return {
-      props: {
-        cart: {
-          _id:  cart_res && cart_res._id.toString(),
-          totalCost: cartTotal,
-          items: cart_res && cart_res.items.map((item) => ({
-            productId: item.productId._id,
-            productName: item.productId.name,
-            productPrice: item.productId.price,
-            productImage: item.productId.main_image,
-            qty: item.qty,
-            countInStock: item.productId.countInStock,
-          })),
-        },
-      },
-    };
-  } catch (error) {
-    console.log(error);
-  }
-
-  } else {
-    return {
-      props: {
-        cart: {
-          _id: "",
-          totalCost: 0,
-          items: [],
-        },
-      },
-    };
-  }
-
-
-};
-
-export default Shipping;
+export default dynamic(() => Promise.resolve(Shipping), {ssr: false});

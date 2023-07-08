@@ -14,6 +14,7 @@ import { fetchProductData } from "../store/products-actions";
 
 // Material Tailwind
 import { Typography } from "@material-tailwind/react";
+import { fetchuserdata } from "../store/user-actions";
 
 
 
@@ -24,13 +25,16 @@ const HomePage = () => {
   const productState = useSelector((state) => state.products);
   const { products, loading } = productState;
 
+  const userState = useSelector((state) => state.user);
+
   useEffect(() => {
     if(products.length === 0) dispatch(fetchProductData());
+    if(userState.email.length === 0) dispatch(fetchuserdata());
   }, [dispatch]);
 
   const cards = ["1", "2", "3", "4", "5", "6", "7", "8"];
 
-
+  
   return (
 
     <div className="mb-14">

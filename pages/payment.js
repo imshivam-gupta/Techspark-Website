@@ -263,7 +263,6 @@ const Payment = ({ cart }) => {
 export const getServerSideProps = async ({ req, res }) => {
   const session = await getServerSession(req, res, authOptions);
 
-  // console.log(session.email);
 
   if (session) {
     const req_sample = await fetch(`https://techspark.vercel.app/api/cart`, {

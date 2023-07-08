@@ -1,114 +1,29 @@
 import { useDispatch, useSelector } from "react-redux";
 import { fetchuserdata } from "../../store/user-actions";
-import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
-import {
-  Avatar,
-  Typography,
-  Card,
-  CardHeader,
-  CardBody,
-  CardFooter,
-  Tooltip,
-  IconButton,
-  Button,
-} from "@material-tailwind/react";
-
-// import {  } from "@heroicons/react/24/outline"
+import {Typography,Card,CardHeader,CardBody,CardFooter,Tooltip} from "@material-tailwind/react";
+import dynamic from "next/dynamic";
 
 const Profile = () => {
-  const { data: session, status } = useSession();
+
   const router = useRouter();
-
-  if (status !== "loading" && !session) {
-    router.push("/login");
-  }
-
+  let isAuthenticated = true;
+  if(localStorage.getItem("token")==='null') isAuthenticated=false;
+  if(!isAuthenticated) router.push("/login");
   const dispatch = useDispatch();
   const userState = useSelector((state) => state.user);
-  const {
-    name,
-    image,
-    email,
-    phone,
-    main_address,
-    addresses,
-    orders,
-    billing_address,
-    birthday,
-    gender,
-    loading,
-  } = userState;
-
+  
   useEffect(() => {
-    if (email === "" || image==="" || name==="") dispatch(fetchuserdata(session?.user?.email)), [dispatch];
+    if(isAuthenticated) dispatch(fetchuserdata()), [dispatch];
   });
 
   return (
     <div className="w-full px-10 py-10 flex flex-col lg:flex-row gap-x-10">
 
+ 
 
-        <div className="w-1/3">
-            <Card className="w-96">
-                <CardHeader floated={false} className="h-48">
-                <img src={image} alt="profile-picture" />
-                </CardHeader>
-
-                <CardBody className="text-center">
-                <Typography variant="h4" color="blue-gray" className="mb-2">
-                    {name}
-                </Typography>
-                <Typography color="blue" className="font-medium" textGradient>
-                    Premium User
-                </Typography>
-                </CardBody>
-                <CardFooter className="flex justify-center gap-x-6 pt-0 w-2/3 mx-auto">
-                
-                    <Tooltip content="Instagram">
-                    
-                        <img
-                        src="/instagram.svg"
-                        alt=""
-                        className="object-contain h-10 w-10"
-                        />
-                    </Tooltip>
-                    <Tooltip content="Facebook">
-                    
-                        <img
-                        src="/facebook.svg"
-                        alt=""
-                        className="object-contain h-10 w-10"
-                        />
-                    </Tooltip>
-
-                    <Tooltip content="Github">
-                    
-                        <img
-                        src="/github.svg"
-                        alt=""
-                        className="object-contain h-10 w-10"
-                        />
-                
-                    </Tooltip>
-
-                    <Tooltip content="Linkedin">
-
-                        <img
-                        src="/linkedin.svg"
-                        alt=""
-                        className="object-contain h-10 w-10"
-                        />
-
-                    </Tooltip>
-                
-                </CardFooter>
-            </Card>
-
-        </div>
-
-
-    <div className="grid grid-cols-2 gap-x-3 gap-y-2 w-4/6">
+    <div className="grid grid-cols-2 place-items-center gap-x-3 gap-y-2 w-4/6 mx-auto">
 
       <Card className="mt-6 hover:shadow-xl w-96 cursor-pointer" onClick={()=> router.push("/my-orders")}>
       <CardBody>
@@ -160,7 +75,7 @@ const Profile = () => {
       </CardBody>
     </Card>
      
-      <Card className="mt-6 hover:shadow-xl w-96 cursor-pointer" onClick={()=>router.push("/developer")}>
+      <Card className="mt-6 hover:shadow-xl w-96 cursor-pointer" onClick={()=>router.push("https://shivam-gupta.vercel.app/")}>
       <CardBody>
         
         <div className="flex flex-row gap-x-4">
@@ -188,4 +103,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default dynamic(() => Promise.resolve(Profile), {ssr: false});

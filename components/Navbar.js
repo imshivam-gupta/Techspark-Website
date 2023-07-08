@@ -1,27 +1,13 @@
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
-import { signOut, useSession } from "next-auth/react";
+import React, { useState } from "react";
 import { Avatar, Button, Menu, MenuHandler, MenuItem, MenuList, Typography } from "@material-tailwind/react";
-
-import {
-  CubeTransparentIcon,
-  UserCircleIcon,
-  CodeBracketSquareIcon,
-  Square3Stack3DIcon,
-  ChevronDownIcon,
-  Cog6ToothIcon,
-  InboxArrowDownIcon,
-  LifebuoyIcon,
-  PowerIcon,
-  RocketLaunchIcon,
-  Bars2Icon,
-} from "@heroicons/react/24/outline";
-
-
-
+import { UserCircleIcon,ChevronDownIcon,Cog6ToothIcon,InboxArrowDownIcon,LifebuoyIcon,PowerIcon,} from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchProductData } from "../store/products-actions";
+import dynamic from "next/dynamic";
+import { userActions } from "../store/user-slice";
+import { SearchBar } from "./SearchBar";
+import { fetchuserdata } from "../store/user-actions";
 
 const profileMenuItems = [
   {
@@ -42,7 +28,7 @@ const profileMenuItems = [
   {
     label: "Developer",
     icon: LifebuoyIcon,
-    url: "/developer"
+    url: "https://shivam-gupta.vercel.app/"
   },
   {
     label: "Sign Out",
@@ -50,15 +36,43 @@ const profileMenuItems = [
     url: "/signout"
   },
 ];
+
+
+const NavLink = ({ text, href }) => {
+  return(
+    <li className="hidden lg:block">
+      <Link href={href}>
+        <div className="py-2 px-4 text-gray-700 hover:text-blue-500">
+          {text}
+        </div>
+      </Link>
+    </li>
+)};
+  
  
-function ProfileMenu({data}) {
+const Logo = () => {
+  return(
+    <div className="items-center flex-grow w-1/12 hidden md:flex">
+      <img src="/logo4.png" className="h-12 mr-3" alt="Logo" />
+    </div>
+)};
+
+
+const ProfileMenu = ({data}) => {
 
   const router= useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const closeMenu = () => setIsMenuOpen(false);
+  const dispatch = useDispatch();
+
+  const signOut = () =>{
+    let user = {};
+    localStorage.setItem("token", null);
+    dispatch(userActions.replaceUser(user));
+    router.push("/login");
+  }
  
   return (
-    
+    <li>
       <Menu open={isMenuOpen} handler={setIsMenuOpen} placement="bottom-end">
         <MenuHandler>
           <Button
@@ -136,159 +150,36 @@ function ProfileMenu({data}) {
                 
         </MenuList>
       </Menu>
- 
+      </li>
   );
 }
 
 
-function Navbar({ user }) {
-  const { data: session, status } = useSession();
-  const [keyword,setKeyword] = useState('')
-  const loading = status === "loading";
+const Navbar = () => {
 
-  const router = useRouter();
-
-  const submitHandler = (e) => {
-    e.preventDefault()
-
-    if(keyword.trim()){
-        router.push(`/search/?query=${keyword}`)
-    }
-    else{
-      router.push(`/`)
-    }
-  }
-
+  let isAuthenticated = true;
+  if(localStorage.getItem("token")==='null') isAuthenticated=false;
+  const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
-
-  const productState = useSelector((state) => state.products);
-  const { products, prodloading=loading } = productState;
-
-  useEffect(() => {
-    if(products.length === 0) dispatch(fetchProductData());
-  }, [dispatch]);
-
-  const distinctCategory = [...new Set(products.map((product) => product.category))];
-
+  if(isAuthenticated && user?.image==='') dispatch(fetchuserdata());
 
   return (
     <nav className="flex flex-row justify-around py-2 px-4 bg-white-200 relative gap-4 shadow-xl z-50">
 
-
-      <div className="items-center flex-grow w-1/12 hidden md:flex">
-        {/* <Link href="/"> */}
-          <img src="/logo4.png" className="h-12 mr-3" alt="Logo" />
-        {/* </Link> */}
-      </div>
-
-<div className="w-full lg:w-6/12 h-full flex justify-center gap-x-6">
-      <form className="relative w-full lg:w-1/2" onSubmit={submitHandler}>
-        <div onClick={submitHandler} className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-          <svg
-            aria-hidden="true"
-            className="w-5 h-5 text-gray-500 dark:text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            ></path>
-          </svg>
-        </div>
-        <input
-          type="text"
-          id="default-search"
-          className="block w-full py-3 pl-10 text-sm text-gray-900 border border-gray-300 outline-none rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
-          placeholder="Search Laptops, Keyboards..."
-          onChange={e => setKeyword(e.target.value)}
-        />
-      </form>
-
-      {
-        
-            <div className="my-auto hidden lg:block">
-              <Menu
-                animate={{
-                  mount: { y: 0 },
-                  unmount: { y: 25 },
-                }}
-                >
-                  <MenuHandler>
-                    <Button variant="outlined" size="sm">Select Category</Button>
-                  </MenuHandler>
-                  <MenuList>
-                    {products.length > 0 && distinctCategory.map((category) => (
-                      <MenuItem key={category} onClick={() => router.push(`/search/?category=${category}`)}>{category}</MenuItem>
-                    ))}
-                  </MenuList>
-              </Menu>
-            </div>
-          
-        }
-
-</div>
+      <Logo />
+      <SearchBar />
       
-
-      <ul className={`flex w-3/12 items-center justify-end pr-4 ${ !session && loading ? "opacity-0" : "opacity-100"} transition-opacity`}>
-
-      <li className="hidden lg:block">
-          <Link href="/developer">
-            <div className="py-2 px-4 text-gray-700 hover:text-blue-500">
-              Developer
-            </div>
-          </Link>
-        </li>
-    
-
-        <li className="hidden lg:block">
-          <Link href="/">
-            <div className="py-2 px-4 text-gray-700 hover:text-blue-500">
-              Home
-            </div>
-          </Link>
-        </li>
-
-      
-      
-        <li className="hidden lg:block">
-          <Link href="/cart">
-            <div className="py-2 px-4 text-gray-700 hover:text-blue-500">
-              Cart
-            </div>
-          </Link>
-        </li>
-
-        {!loading && !session && (
-          <li>
-            <Link href="/login">
-              <div className="py-2 px-4 text-gray-700 hover:text-blue-500">
-                Sign In
-              </div>
-            </Link>
-          </li>
-        )}
-
-    
-        {session && (
-          <li>
-            {session?.user &&  session.user.image &&  session.user.name && (
-              <ProfileMenu data={session.user}/>
-              // <div className="flex items-center gap-2 ml-4">
-              // <Avatar src={`${session.user.image}`} alt="avatar" size="sm" />
-              //   <Typography variant="h6">{session.user.name.split(" ")[0]}</Typography>
-              // </div> 
-            )}
-          </li>
-        )}
-
+      <ul className={`flex w-3/12 items-center justify-end pr-4 opacity-100 transition-opacity`}>
+        <NavLink text="Home" href="/" />
+        <NavLink text="Developer" href="https://shivam-gupta.vercel.app/" />
+        <NavLink text="Cart" href="/cart" />
+        {!isAuthenticated && <NavLink text="Sign In" href="/login" />}
+        {isAuthenticated &&  user?.image && <ProfileMenu data={user}/> }
       </ul>
+
     </nav>
   );
 }
 
-export default Navbar;
+
+export default dynamic(() => Promise.resolve(Navbar), {ssr: false});
