@@ -1,9 +1,9 @@
 import Link from "next/link";
 // import Logo from '../images/logo/logo-icon.svg';
 import DarkModeSwitcher from './DarkModeSwitcher';
-import DropdownMessage from './DropdownMessage';
-import DropdownNotification from './DropdownNotification';
-import DropdownUser from './DropdownUser';
+import DropdownMessage from './DropDownMessage';
+import DropdownNotification from './DropDownNotification';
+import DropdownUser from './DropDownUser';
 
 
 const Header = ({sidebarOpen,setSidebarOpen}) => {
