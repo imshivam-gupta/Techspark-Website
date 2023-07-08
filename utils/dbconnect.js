@@ -6,10 +6,9 @@ export const BACKEND_URL = 'https://blue-weary-hippo.cyclic.app/'
 
 const connectDB = handler => async (req, res) => {
   if (mongoose.connections[0].readyState) {
-    // Use current db connection
     return handler(req, res);
   }
-  // Use new db connection
+
   await mongoose.connect(process.env.DB_URL);
   return handler(req, res);
 };
