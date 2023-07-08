@@ -10,7 +10,7 @@ import { BACKEND_URL } from "../utils/dbconnect";
 
 
 const CartScreen = () => {
-  
+
   console.log(localStorage.getItem("token"));
   const router = useRouter(); 
   const dispatch = useDispatch();
@@ -18,7 +18,7 @@ const CartScreen = () => {
   const prodStateRedux = useSelector((state) => state.products);
 
   let isAuthenticated = true;
-  if(localStorage.getItem("token")==='null') isAuthenticated = false;
+  if(localStorage.getItem("token")===null) isAuthenticated = false;
 
   if (!isAuthenticated) {
     router.push("/login");

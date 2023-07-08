@@ -17,8 +17,9 @@ function LoginPage() {
   console.log(localStorage.getItem("token"));
   const dispatch = useDispatch();
   const router = useRouter();
+
   let isAuthenticated = false;
-  if(localStorage.getItem("token")!=='null') isAuthenticated=true;
+  if(localStorage.getItem("token")) isAuthenticated=true;
   if(isAuthenticated) router.push("/");
 
 

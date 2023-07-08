@@ -66,7 +66,7 @@ const ProfileMenu = ({data}) => {
 
   const signOut = () =>{
     let user = {};
-    localStorage.setItem("token", null);
+    localStorage.removeItem('token');
     dispatch(userActions.replaceUser(user));
     router.push("/login");
   }
@@ -158,7 +158,7 @@ const ProfileMenu = ({data}) => {
 const Navbar = () => {
 
   let isAuthenticated = true;
-  if(localStorage.getItem("token")==='null') isAuthenticated=false;
+  if(localStorage.getItem("token")===null) isAuthenticated=false;
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
   if(isAuthenticated && user?.image==='') dispatch(fetchuserdata());

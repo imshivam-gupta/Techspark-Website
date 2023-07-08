@@ -9,7 +9,7 @@ const Profile = () => {
 
   const router = useRouter();
   let isAuthenticated = true;
-  if(localStorage.getItem("token")==='null') isAuthenticated=false;
+  if(localStorage.getItem("token")===null) isAuthenticated=false;
   if(!isAuthenticated) router.push("/login");
   const dispatch = useDispatch();
   const userState = useSelector((state) => state.user);
