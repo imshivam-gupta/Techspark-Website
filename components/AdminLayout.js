@@ -10,9 +10,9 @@ function AdminLayout({ children }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     const router = useRouter();
-    // if(localStorage.getItem('token')===null){
-    //     router.push('/login');
-    // }
+    if(localStorage.getItem('token')===null){
+        router.push('/login');
+    }
   return (
     <>
      <div className="dark:bg-boxdark-2 dark:text-bodydark">
@@ -40,5 +40,5 @@ function AdminLayout({ children }) {
   );
 }
 
-// export default dynamic(() => Promise.resolve(AdminLayout), {ssr: false});
-export default AdminLayout;
+export default dynamic(() => Promise.resolve(AdminLayout), {ssr: false});
+// export default AdminLayout;
