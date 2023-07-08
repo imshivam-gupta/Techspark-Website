@@ -3,13 +3,14 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import AdminLayout from "../../components/AdminLayout";
 import { BACKEND_URL } from "../../utils/dbconnect";
-
+import Link from "next/link";
+import { PencilSquareIcon } from "@heroicons/react/24/outline";
  
-const TABLE_HEAD = ["Price", "Discount", "Brand","Inventory","Seller"];
+const TABLE_HEAD = ["Price", "Brand","Inventory","Seller"," "];
 
-const TableRow = ({ image,title, price, discount, category, brand, count_in_stock }) => {
+const TableRow = ({ id,image,title, price, category, brand, count_in_stock,seller }) => {
     return(
-    <div className="grid grid-cols- border-t border-stroke py-4.5 px-4 dark:border-strokedark sm:grid-cols-8 md:px-6 2xl:px-7.5">
+    <div className="grid grid-cols-8 border-t border-stroke py-4.5 px-4 dark:border-strokedark sm:grid-cols-8 md:px-6 2xl:px-7.5">
     <div className="col-span-2 flex items-center">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <div className="h-12.5 w-15 rounded-md">
@@ -24,10 +25,7 @@ const TableRow = ({ image,title, price, discount, category, brand, count_in_stoc
       <p className="text-sm text-black dark:text-white">{category}</p>
     </div>
     <div className="col-span-1 flex items-center">
-      <p className="text-sm text-black dark:text-white">{price}</p>
-    </div>
-    <div className="col-span-1 flex items-center">
-      <p className="text-sm text-black dark:text-white">{discount===0?"No Discount":`${discount} `}</p>
+      <p className="text-sm text-black dark:text-white">{`${price}`}</p>
     </div>
     <div className="col-span-1 flex items-center">
       <p className="text-sm text-black dark:text-white">{brand}</p>
@@ -35,8 +33,19 @@ const TableRow = ({ image,title, price, discount, category, brand, count_in_stoc
     <div className="col-span-1 flex items-center">
       <p className="text-sm text-meta-3 dark:text-white">{count_in_stock}</p>
     </div>
+    <div className="col-span-1 flex items-center">
+      <p className="text-sm text-meta-3 dark:text-white">{seller.split(" ").slice(0,1).join(0,1)}</p>
+    </div>
+    <div className="col-span-1 w-full flex flex-row items-center justify-center">
+      <Link href={`/admin/products/edit/${id}`} className="">
+      <p className="text-sm text-meta-3 dark:text-white w-full">
+        <PencilSquareIcon className="h-6 w-6"/>
+      </p>
+      </Link>
+    </div>
   </div>
 )}
+
 
 const TableHeading = ({title}) => {
     return(
@@ -72,7 +81,6 @@ export default function AdminUser() {
 
             if(error===null){
                 setProducts(response.data.data.docs);
-                console.log(response.data.data.docs);
                 setLoading(false);
             }
         }
@@ -84,7 +92,7 @@ export default function AdminUser() {
   
 
   return (
-    loading? <Spinner color="blue" size="xl" className="mt-32 mx-auto" /> : error? <Typography variant="h3" color="blue-gray" className="text-center mt-32">Something went wrong</Typography>:
+    loading? <Spinner color="blue" size="xl" className="mt-32 mx-auto" /> : error? <Typography variant="h3" color="purple" className="text-center mt-32">Something went wrong</Typography>:
     <>
 
 
@@ -116,12 +124,14 @@ export default function AdminUser() {
                 <TableRow
                     key={product._id}
                     image={product.image}
-                    title={product.title}
+                    title={product.title.split(" ").slice(0,3).join(" ")}
                     price={product.price}
                     discount={product.discount}
                     category={product.category}
                     brand={product.brand}
                     count_in_stock={product.count_in_stock}
+                    seller={product.seller_name}
+                    id={product._id}
                 />
             ))
         }

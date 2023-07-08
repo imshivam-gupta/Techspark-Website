@@ -3,6 +3,8 @@ import Link from "next/link";
 import { useDispatch } from 'react-redux';
 import { userActions } from '../store/user-slice';
 import { useRouter } from "next/router";
+import dynamic from "next/dynamic";
+
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -41,6 +43,7 @@ const DropdownUser = () => {
   const signOut = () =>{
     console.log("called")
     let user = {};
+    localStorage.removeItem('mailsent');
     localStorage.removeItem('token');
     dispatch(userActions.replaceUser(user));
     router.push("/login");
@@ -189,4 +192,4 @@ const DropdownUser = () => {
   );
 };
 
-export default DropdownUser
+export default dynamic(() => Promise.resolve(DropdownUser), {ssr: false});

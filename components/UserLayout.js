@@ -6,6 +6,7 @@ import { IconButton, SpeedDial,  SpeedDialHandler,SpeedDialContent, SpeedDialAct
 import { PlusIcon, HomeIcon, ArrowLeftIcon, ShoppingCartIcon,} from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useState } from "react";
 
 
 export default function Layout({ children }) {
@@ -16,7 +17,7 @@ export default function Layout({ children }) {
     router.back();
   };
 
- 
+
   return (
     <>
         <Navbar />

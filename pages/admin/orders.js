@@ -1,11 +1,61 @@
-import { Card, CardBody, CardFooter, CardHeader,Typography,Input,Button,Chip,  Avatar,IconButton, Spinner, } from "@material-tailwind/react";
-import AdminLayout from "../../components/AdminLayout";
-import { ArrowDownTrayIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { useEffect, useState } from "react";
-const TABLE_HEAD = ["Order", "Order Time", "Payment Status", "Total Amount","Delivery Status","Zipcode"];
+import { Spinner, Typography } from "@material-tailwind/react";
 import axios from "axios";
+import { useEffect, useState } from "react";
+import AdminLayout from "../../components/AdminLayout";
 import { BACKEND_URL } from "../../utils/dbconnect";
+import Link from "next/link";
+import { PencilSquareIcon } from "@heroicons/react/24/outline";
+ 
 
+const TABLE_HEAD = ["Created At", "Amount","Payment Status","Postal Code"," "];
+
+const TableRow = ({ id,image,title,createdAt,totalPrice,paid_status,zipcode}) => {
+    console.log(totalPrice)
+    return(
+    <div className="grid grid-cols-8 border-t border-stroke py-4.5 px-4 dark:border-strokedark sm:grid-cols-8 md:px-6 2xl:px-7.5">
+    <div className="col-span-2 flex items-center">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+        <div className="h-12.5 w-15 rounded-md">
+          <img src={image} alt="Product" />
+        </div>
+        <p className="text-sm text-black dark:text-white">
+          {title}
+        </p>
+      </div>
+    </div>
+    <div className="col-span-1 hidden items-center sm:flex">
+      <p className="text-sm text-black dark:text-white">{createdAt}</p>
+    </div>
+    <div className="col-span-1 flex items-center">
+      <p className="text-sm text-black dark:text-white">{totalPrice}</p>
+    </div>
+    <div className="col-span-1 flex items-center">
+      <p className="text-sm text-black dark:text-white">{paid_status}</p>
+    </div>
+    <div className="col-span-1 flex items-center">
+      <p className="text-sm text-black dark:text-white">{zipcode}</p>
+    </div>
+    <div className="col-span-1 flex items-center">
+      <Link href ={`mailto: ${zipcode}`} className="text-sm text-black dark:text-white">Send Now</Link>
+    </div>
+    <div className="col-span-1 w-full flex flex-row items-center justify-center">
+      <Link href={`/admin/products/edit/${id}`} className="">
+      <p className="text-sm text-meta-3 dark:text-white w-full">
+        <PencilSquareIcon className="h-6 w-6"/>
+      </p>
+      </Link>
+    </div>
+  </div>
+)}
+
+
+const TableHeading = ({title}) => {
+    return(
+    <div className="col-span-1 flex items-center">
+        <p className="font-medium">{title}</p>
+    </div>
+)}
+ 
 
 const AdminOrders = () => {
 
@@ -30,10 +80,10 @@ const AdminOrders = () => {
                 setLoading(false);
             });
                 
+            // console.log(response.data.data.orders);
 
             if(error===null){
                 setOrders(response.data.data.orders);
-                console.log(response.data.data.orders);
                 setLoading(false);
             }
         }
@@ -47,152 +97,50 @@ const AdminOrders = () => {
 
     
     return(
-        loading? <Spinner color="blue" size="xl" className="mt-32 mx-auto" /> : error? <Typography variant="h3" color="blue-gray" className="text-center mt-32">Something went wrong</Typography>:
+        loading? <Spinner color="blue" size="xl" className="mt-32 mx-auto" /> : error? <Typography variant="h3" color="purple" className="text-center mt-32">Something went wrong</Typography>:
         <div>
-            <Typography variant="h3" color="blue-gray" className="text-center mb-4">All Orders</Typography>
-            <Card className="w-3/4 py-4 mx-auto overflow-hidden shadow-2xl">
-            <CardHeader floated={false} shadow={false} className="rounded-none">
-                <div className="mb-4 flex flex-col justify-between gap-8 md:flex-row md:items-center">
-                <div>
-                    <Typography variant="h5" color="blue-gray">
-                    Your Orders
-                    </Typography>
-                    <Typography color="gray" className="mt-1 font-normal">
-                    These are your orders placed till now
-                    </Typography>
-                </div>
-                <div className="flex w-full shrink-0 gap-2 md:w-max">
-                    <div className="w-full md:w-72">
-                    <Input label="Search" icon={<MagnifyingGlassIcon className="h-5 w-5" />} />
-                    </div>
-                </div>
-                </div>
-            </CardHeader>
-            <CardBody className="overflow-auto py-2 px-0">
-                <table className="w-full min-w-max table-auto text-left">
-                <thead>
-                    <tr>
-                    {TABLE_HEAD.map((head) => (
-                        <th key={head} className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4">
-                        <Typography
-                            variant="small"
-                            color="blue-gray"
-                            className="font-normal leading-none opacity-70"
-                        >
-                            {head}
-                        </Typography>
-                        </th>
-                    ))}
-                    </tr>
-                </thead>
-                <tbody>
-                    {orders.map( ({ createdAt,totalPrice,paymentMethod,shippingAddress,items,isPaid,_id,isDelivered }, index) => {
-                        const isLast = index === orders.length - 1;
-                        const classes = isLast ? "p-4" : "p-4 border-b border-blue-gray-50";
-        
-                        return (
-                        <tr key={_id}>
 
-                        
-                            <td className={classes}>
-                            <div className="flex items-center gap-3">
-                                <Avatar
-                                src={items[0].productId.image}
-                                alt={name}
-                                size="md"
-                                className="border border-blue-gray-50 bg-blue-gray-50/50 object-contain p-1"
-                                />
-                                <Typography variant="small" color="blue-gray" className="font-bold">
-                                {items[0].productId.title.split(" ").slice(0, 2).join(" ")}
-                                </Typography>
-                            </div>
-                            </td>
+            <div className="mb-6 px-4 md:px-6 xl:px-7.5">
+                <h4 className="text-4xl font-semibold text-black text-center dark:text-white">
+                    All orders with Techspark
+                </h4>
+            </div>
+
+            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+     
+
+     <div className="grid grid-cols-8 border-t border-stroke py-4.5 px-4 dark:border-strokedark sm:grid-cols-8 md:px-6 2xl:px-7.5">
+
+       <div className="col-span-2 hidden items-center sm:flex">
+         <p className="font-medium">Your Orders</p>
+       </div>
+
+       { TABLE_HEAD.map((item) => ( <TableHeading title={item}/> )) }
+     
+     </div>
+
+       {
+           orders.map(({createdAt,totalPrice,shippingAddress,items,isPaid,_id}) => (
+               <TableRow
+                    key={_id}
+                    id={_id}
+                    image={items[0]?.productId.image}
+                    title={items[0]?.productId.title.split(" ").slice(0, 2).join(" ")}
+                    createdAt={createdAt}
+                    totalPrice={totalPrice}
+                    paid_status={isPaid===true ? "Paid" : "Pending"}
+                    zipcode={shippingAddress?.postalCode}
+               />
+           ))
+       }
+    
+   </div>
 
 
-                            <td className={classes}>
-                            <Typography variant="small" color="blue-gray" className="font-normal">
-                                {createdAt}
-                            </Typography>
-                            </td>
 
 
-                            <td className={classes}>
-                            <div className="w-max">
-                                <Chip
-                                size="sm"
-                                variant="ghost"
-                                value={isPaid=== true ? "Paid" :"Not Paid"}
-                                color={
-                                    isPaid === true ? "green" : isPaid === false ? "amber" : "red"
-                                }
-                                />
-                            </div>
-                            </td>
-                        
-                            <td className={classes}>
-                            <Typography variant="small" color="blue-gray" className="font-normal">
-                            &#8377; {totalPrice/100}
-                            </Typography>
-                            </td>
 
-                            <td className={classes}>
-                            <div className="w-max">
-                                <Chip
-                                size="sm"
-                                variant="ghost"
-                                value={isDelivered=== true ? "Paid" : isDelivered === false ? "Pending" : "To be delivered"}
-                                color={
-                                    isDelivered === true ? "green" : isDelivered === false ? "amber" : "red"
-                                }
-                                />
-                            </div>
-                            </td>
-
-                            <td className={classes}>
-                            <Typography variant="small" color="blue-gray" className="font-normal">
-                                {shippingAddress.postalCode}
-                            </Typography>
-                            </td>
-
-                        </tr>
-                        );
-                    },
-                    )}
-                </tbody>
-                </table>
-            </CardBody>
-            <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4">
-                <Button variant="outlined" color="blue-gray" size="sm">
-                Previous
-                </Button>
-                <div className="flex items-center gap-2">
-                <IconButton variant="outlined" color="blue-gray" size="sm">
-                    1
-                </IconButton>
-                <IconButton variant="text" color="blue-gray" size="sm">
-                    2
-                </IconButton>
-                <IconButton variant="text" color="blue-gray" size="sm">
-                    3
-                </IconButton>
-                <IconButton variant="text" color="blue-gray" size="sm">
-                    ...
-                </IconButton>
-                <IconButton variant="text" color="blue-gray" size="sm">
-                    8
-                </IconButton>
-                <IconButton variant="text" color="blue-gray" size="sm">
-                    9
-                </IconButton>
-                <IconButton variant="text" color="blue-gray" size="sm">
-                    10
-                </IconButton>
-                </div>
-                <Button variant="outlined" color="blue-gray" size="sm">
-                Next
-                </Button>
-            </CardFooter>
-    </Card>
+            
         </div>
     )
 }

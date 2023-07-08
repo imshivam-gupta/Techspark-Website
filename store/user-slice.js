@@ -13,6 +13,7 @@ const userSlice = createSlice({
         birthday: "",
         gender: "",
         image:"",
+        role:"user",
         loading: true
     },
     reducers: {
@@ -27,6 +28,7 @@ const userSlice = createSlice({
             state.billing_address = user?.billing_address || "";
             state.image = user?.image || "";
             state.loading = false;
+            state.role = user?.role || "user";
         }
     }
 });

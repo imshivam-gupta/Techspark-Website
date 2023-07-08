@@ -51,6 +51,12 @@ export default function OrdersPage() {
     )
   }
 
+  if(orders && orders.length===0){ return(
+    <div className={"py-10 mt-40 px-6 w-2/3 text-center mx-auto text-2xl border-t border-b border-gray-200 bg-gray-100"}>
+      You have not placed any orders yet !. Please place an order to see it here.
+    </div>
+  )}
+
   return (
     <Card className="mt-6 w-3/4 py-4 mx-auto overflow-hidden shadow-2xl">
       <CardHeader floated={false} shadow={false} className="rounded-none">
@@ -72,6 +78,9 @@ export default function OrdersPage() {
       </CardHeader>
       <CardBody className="overflow-auto py-2 px-0">
         <table className="w-full min-w-max table-auto text-left">
+
+
+
           <thead>
             <tr>
               {TABLE_HEAD.map((head) => (
@@ -87,8 +96,10 @@ export default function OrdersPage() {
               ))}
             </tr>
           </thead>
+
+        
           <tbody>
-            {orders.map( ({ createdAt,totalPrice,paymentMethod,shippingAddress,items,isPaid,_id,isDelivered }, index) => {
+            {orders && orders.map( ({ createdAt,totalPrice,paymentMethod,shippingAddress,items,isPaid,_id,isDelivered }, index) => {
                 const isLast = index === orders.length - 1;
                 const classes = isLast ? "p-4" : "p-4 border-b border-blue-gray-50";
  
@@ -161,6 +172,10 @@ export default function OrdersPage() {
               },
             )}
           </tbody>
+          
+          
+
+
         </table>
       </CardBody>
       <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4">

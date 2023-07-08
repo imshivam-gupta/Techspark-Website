@@ -8,6 +8,9 @@ import dynamic from "next/dynamic";
 import { userActions } from "../store/user-slice";
 import { SearchBar } from "./SearchBar";
 import { fetchuserdata } from "../store/user-actions";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { BACKEND_URL } from "../utils/dbconnect";
 
 const profileMenuItems = [
   {
@@ -52,9 +55,9 @@ const NavLink = ({ text, href }) => {
  
 const Logo = () => {
   return(
-    <div className="items-center flex-grow w-1/12 hidden md:flex">
+    <Link className="items-center flex-grow w-1/12 hidden md:flex" href={"/"}>
       <img src="/logo4.png" className="h-12 mr-3" alt="Logo" />
-    </div>
+    </Link>
 )};
 
 
@@ -67,6 +70,7 @@ const ProfileMenu = ({data}) => {
   const signOut = () =>{
     let user = {};
     localStorage.removeItem('token');
+    localStorage.removeItem('mailsent');
     dispatch(userActions.replaceUser(user));
     router.push("/login");
   }
@@ -163,14 +167,62 @@ const Navbar = () => {
   const dispatch = useDispatch();
   if(isAuthenticated && user?.image==='') dispatch(fetchuserdata());
 
+  const showToast = () =>
+    toast("Incorrect Credentials. Try again or register yourself", {
+      hideProgressBar: true,
+      autoClose: 3000,
+      type: "error",
+      position: toast.POSITION.TOP_CENTER,
+  });
+
+  const requestAdminHandler = async () =>{
+    if(localStorage.getItem('mailsent')){
+      toast("Mail Already Sent", {
+        hideProgressBar: true,
+        autoClose: 3000,
+        type: "error",
+        position: toast.POSITION.TOP_CENTER,
+      });
+      return;
+    }
+
+    const are_u_sure = window.confirm("Are you sure you want to request admin access?");
+    if(!are_u_sure) return;
+
+    await axios.get(`${BACKEND_URL}api/v1/users/requestadmin`,{
+      headers: {
+        'content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    }).then((res)=>{
+      localStorage.setItem('mailsent',true);
+      toast("Mail Sent Successfully", {
+        hideProgressBar: true,
+        autoClose: 3000,
+        type: "success",
+        position: toast.POSITION.TOP_CENTER,
+      });
+    }).catch((err)=>{
+      console.log(err);
+    })
+  }
+
   return (
     <nav className="flex flex-row justify-around py-2 px-4 bg-white-200 relative gap-4 shadow-xl z-50">
 
       <Logo />
       <SearchBar />
       
-      <ul className={`flex w-3/12 items-center justify-end pr-4 opacity-100 transition-opacity`}>
-        <NavLink text="Home" href="/" />
+      <ul className={`flex w-5/12 items-center justify-end pr-4 opacity-100 transition-opacity`}>
+        <NavLink text="Shop" href="/" />
+        {isAuthenticated &&  user?.role ==='admin' && <NavLink text={'Admin Panel'} href={'/admin/orders' }/> }
+        {isAuthenticated &&  user?.role === 'user' && 
+          <li className="hidden lg:block cursor-pointer" onClick={requestAdminHandler}>
+              <div className="py-2 px-4 text-gray-700 hover:text-blue-500">
+                {'Request Admin Access'}
+              </div>
+          </li>
+        }
         <NavLink text="Developer" href="https://shivam-gupta.vercel.app/" />
         <NavLink text="Cart" href="/cart" />
         {!isAuthenticated && <NavLink text="Sign In" href="/login" />}

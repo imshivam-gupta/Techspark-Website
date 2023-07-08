@@ -14,7 +14,6 @@ import { useDispatch } from "react-redux";
 
 
 function LoginPage() {
-  console.log(localStorage.getItem("token"));
   const dispatch = useDispatch();
   const router = useRouter();
 
@@ -22,6 +21,7 @@ function LoginPage() {
   if(localStorage.getItem("token")) isAuthenticated=true;
   if(isAuthenticated) router.push("/");
 
+  const [signingup, setSigningup] = useState(false);
 
 
   const showToast = () =>
@@ -44,6 +44,7 @@ function LoginPage() {
 
   
   const onSubmitLocal = async (e) => {
+    setSigningup(true);
     e.preventDefault();
     const res = await fetch(`${BACKEND_URL}api/v1/users/login`, {
       method: "POST",
@@ -56,15 +57,18 @@ function LoginPage() {
       }),
     });
 
+  
     const data = await res.json();
-    localStorage.setItem("token", data.token);
-    dispatch(userActions.replaceUser( data.data.user));
 
     if(data.status === "success"){
+      localStorage.setItem("token", data.token);
+      dispatch(userActions.replaceUser( data.data.user));
       router.push("/");
     } else{
       showToast();
     }
+
+    setSigningup(false);
   };
 
   
@@ -87,6 +91,12 @@ function LoginPage() {
     await signIn("google", { callbackUrl: "/",});
   };
 
+  if(signingup) return (
+    <section className="mt-6 flex flex-row justify-center min-h-screen pt-6">
+      Please wait while we log you in
+    </section>
+  );
+  
   return (
     <section className="mt-6 flex flex-row justify-center min-h-screen pt-6">
       <div className="bg-gray-100 flex rounded-2xl shadow-lg max-w-6xl items-center h-max w-2/3 justify-stretch">
