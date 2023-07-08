@@ -10,8 +10,8 @@ import {
   CardFooter,
   Avatar,
   IconButton,
-  Tooltip,
   Input,
+  Spinner,
 } from "@material-tailwind/react";
 import { useEffect, useState } from "react";
 import { BACKEND_URL } from "../../utils/dbconnect";
@@ -45,6 +45,11 @@ export default function OrdersPage() {
       fetchOrders();
   },[]);
 
+  if (loading) {
+    return(
+      <Spinner color="blue" size="xl" className="mt-32 mx-auto" />
+    )
+  }
 
   return (
     <Card className="mt-6 w-3/4 py-4 mx-auto overflow-hidden shadow-2xl">

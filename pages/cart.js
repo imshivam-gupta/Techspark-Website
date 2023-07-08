@@ -11,7 +11,7 @@ import { BACKEND_URL } from "../utils/dbconnect";
 
 const CartScreen = () => {
 
-  console.log(localStorage.getItem("token"));
+  
   const router = useRouter(); 
   const dispatch = useDispatch();
   const cartStateRedux = useSelector((state) => state.cart);
@@ -23,7 +23,6 @@ const CartScreen = () => {
   if (!isAuthenticated) {
     router.push("/login");
   }
-
 
   useEffect(() => {
     if (prodStateRedux.products.length === 0) {
@@ -68,7 +67,7 @@ const CartScreen = () => {
     const token = localStorage.getItem("token");
     dispatch(cartActions.removeItemFromCart(id));
 
-    const res = await fetch(`${BACKEND_URL}api/v1/cart/item/${id}`, {
+    await fetch(`${BACKEND_URL}api/v1/cart/item/${id}`, {
       method: "DELETE",
       headers: {
         "content-type": "application/json",
@@ -76,7 +75,6 @@ const CartScreen = () => {
       },
     });
 
-    const data = await res.json();
   };
 
 

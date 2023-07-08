@@ -1,27 +1,78 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { useSession } from "next-auth/react";
-import { Textarea, Button, Rating, CardHeader, CardBody, Card, Avatar,Typography} from "@material-tailwind/react";
+import { Textarea, Button, Rating, CardHeader, CardBody, Card, Avatar,Typography, Spinner, Input} from "@material-tailwind/react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProductData } from "../../store/products-actions";
 import { cartActions } from "../../store/cart-slice";
+import dynamic from "next/dynamic";
+import { toast } from "react-toastify";
+import { BACKEND_URL } from "../../utils/dbconnect";
 
+const ReviewBox = ({review}) => {
+  return(
+    <Card color="transparent" shadow={false} className="w-full  border-2 border-purple-200 px-6">
+    <CardHeader
+      color="transparent"
+      floated={false}
+      shadow={false}
+      className="mx-0 flex items-center gap-4 pt-0 pb-4"
+    >
+      <Avatar
+        size="lg"
+        variant="circular"
+        src={review.image}
+        alt="candice wu"
+      />
+      <div className="flex w-full flex-col gap-0.5">
+        <div className="flex items-center justify-between">
+          <Typography variant="h5" color="blue-gray">
+              {review.name}
+          </Typography>
+        
+        </div>
+
+      </div>
+    </CardHeader>
+    <CardBody className="mb-6 p-0">
+      <Typography>
+        {review.comment}
+      </Typography>
+    </CardBody>
+  </Card>
+)}
 
 const ProductDetails = (props) => {
 
-  const [reviewBox, setReviewBox] = useState(false);
+
+  const showToast = (msg) =>
+  toast(msg, {
+    hideProgressBar: true,
+    autoClose: 5000,
+    type: "error",
+    position: toast.POSITION.TOP_CENTER,
+  });
+
+
   const [currentImage, setCurrentImage] = useState(0);
-  const [rating, setRating] = useState(0);
+  const [title, setTitle] = useState("");
+  const [rating, setRating] = useState(1);
   const [comment, setComment] = useState("");
   const [Qty, SetQty] = useState(1);
+  const [adding_to_cart, setAdding_to_cart] = useState(false);
+  const [submitting_review, setSubmitting_review] = useState(false);
+  const [error, setError] = useState(null);
+  let notuserReview = true;
 
+  
+  let isAuthenticated = false;
+  if(localStorage.getItem("token")!==null) isAuthenticated = true;
 
-  const { data: session, status } = useSession();
-
+  
   const router = useRouter();
   const dispatch = useDispatch();
   
   const prodStateRedux = useSelector((state) => state.products);
+  const userStateRedux = useSelector((state) => state.user);
   const { products,loading } = prodStateRedux;
   const product = products.find((product) => product._id === router.query.productid);
 
@@ -29,91 +80,131 @@ const ProductDetails = (props) => {
     if(products.length === 0) dispatch(fetchProductData());
   }, [dispatch]);
 
-  let has_Logged_In_user_reviewed = false;
 
   const handleImageClick = (index) => {
     setCurrentImage(index);
   };
 
 
-  if(session){
-    let user_email 
-  
-    if(session.user) user_email = session.user.email;
-    else if(session.data) user_email = session.data.user.email;
-    
-    has_Logged_In_user_reviewed = props.product && props.product.reviews && props.product.reviews.length>0 && props.product.reviews.find(
-      (r) => {
-        console.log(r.email,user_email);
-        return r.email === user_email
-      }
-    );
-  }
-
   const handleSubmitReview = async (e) => {
     e.preventDefault();
-    await fetch(`/api/products/${router.query.productid}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "user_email": session.user ? session.user.email : session.data.user.email,
-      },
-      body: JSON.stringify({
-        rating,
-        comment,
-      }),
-    }).then((res) => 
-      window.location.reload()
-    )
-  };
 
-  
+    if(!isAuthenticated){
+      showToast("Please Login to add a review");
+    } else{
 
-  const addToCartHandler = async () => {
-    const prod = {
-      productId:product._id,
-      productName:product.name,
-      productPrice:product.price,
-      productImage:product.main_image,
-      qty:Qty,
-      countInStock:product.countInStock,
-    }
-    dispatch(cartActions.addItemToCart(prod))
-    router.push("/cart");
-    if (session) {
-      await fetch("/api/cart", {
-        method: "POST",
+      if(title === "" || comment === ""){
+        showToast("Please fill all the fields");
+        return;
+      }
+
+      if(rating < 1 || rating > 5){
+        showToast("Please select a valid rating between 1 and 5");
+        return;
+      }
+
+      if(comment.length < 30){
+        showToast("Please enter a comment of atleast 30 characters");
+        return; 
+      }
+
+      setSubmitting_review(true);
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(`${BACKEND_URL}api/v1/products/${router.query.productid}/review`, {
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          user_email: session.user.email,
+          "authorization": `Bearer ${token}`
         },
-        body: JSON.stringify({
-          productId: product._id,
-          qty: Qty,
-        }),
+        body: JSON.stringify({title,rating,comment })
       })
-    } 
+
+      
+      const data = await res.json();
+
+      if(data.status === "success"){
+        setReviewBox(false);
+        setTitle("");
+        setRating(1);
+        setComment("");
+        dispatch(fetchProductData());
+      } else{
+        showToast(data.message);
+      };
+      
+
+      setSubmitting_review(false);
+    };
+  }
+
+
+  const addToCartHandler = async () => {
+    if(!isAuthenticated){
+      showToast("Please Login to add to cart");
+      setTimeout(() => {
+        router.push("/login");
+      }, 2000);
+    } else{
+
+        const prod = {
+          productId:product._id,
+          productName:product.name,
+          productPrice:product.price,
+          productImage:product.main_image,
+          qty:Qty,
+          countInStock:product.countInStock,
+        }
+        dispatch(cartActions.addItemToCart(prod));
+        const token = localStorage.getItem("token");
+        
+        setAdding_to_cart(true);
+        fetch(`${BACKEND_URL}api/v1/cart/item`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            productId: product._id,
+            qty: 1,
+          }),
+        }).then((res) => router.push("/cart"));
+    }
   };
  
 
+  if (adding_to_cart || submitting_review ) {
+    return(
+      <Spinner color="blue" size="xl" className="mt-32 mx-auto" />
+    )
+  }
+  if (submitting_review ) {
+    return(
+      <Spinner color="blue" size="xl" className="mt-32 mx-auto" />
+    )
+  }
+  if (loading) {
+    return(
+      <Spinner color="blue" size="xl" className="mt-32 mx-auto" />
+    )
+  }
 
-  if(loading) return <div>Loader....</div>
+
+  if(userStateRedux.email!=="" && product){
+    if(product.reviews.find((review) => review.user_email === userStateRedux.email)){
+      notuserReview = false;
+    }
+  }
 
 
 
   return (
     <div className="flex flex-col">
-
-
       <div className="flex flex-col md:flex-row">
-
-
-
         <div className="md:w-1/2 flex flex-row px-6 mt-4">
-
-
           <div className="flex flex-col">
-            {product.images.map((image, index) => (
+            {product?.images.map((image, index) => (
               <div
                 key={index}
                 className={`mb-2 cursor-pointer w-20 ${
@@ -131,7 +222,7 @@ const ProductDetails = (props) => {
           </div>
 
           <img
-            src={product.images[currentImage]}
+            src={product?.images[currentImage]}
             alt={`Product Image`}
             className="object-contain h-3/4 mx-auto mb-auto mt-10 w-3/4 mr-6 border-2 border-purple-100"
           />
@@ -142,11 +233,11 @@ const ProductDetails = (props) => {
           <div className="flex flex-row mb-4">
             <div className="flex flex-col my-auto">
               <h2 className="text-2xl h-1/2 font-bold mb-2">
-                {product.name}
+                {product?.name}
               </h2>
               <div className="text-2xl h-1/2 font-bold mb-4">
                 {" "}
-                &#8377; {product.price}
+                &#8377; {product?.price}
               </div>
             </div>
 
@@ -162,7 +253,7 @@ const ProductDetails = (props) => {
                 </svg>
                 <span className="text-center w-full text-3xl">
                   {" "}
-                  {product.rating}
+                  {product?.rating}
                 </span>
               </div>
               <p className="text-sm text-gray-500">Average User Rating</p>
@@ -177,7 +268,7 @@ const ProductDetails = (props) => {
               value={Qty}
               onChange={(e) => SetQty(e.target.value)}
             >
-              {[...Array(product.countInStock).keys()].map((x) => (
+              {[...Array(product?.countInStock).keys()].map((x) => (
                 <option key={x + 1} value={x + 1}>
                   {x + 1}
                 </option>
@@ -189,10 +280,10 @@ const ProductDetails = (props) => {
           </div>
           
 
-          <p className="text-gray-700 mb-4">{product.tagline}</p>
+          <p className="text-gray-700 mb-4">{product?.tagline}</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             {/* Sample Offer Cards */}
-            {product.offers.map((offer, index) => (
+            {product?.offers.map((offer, index) => (
               <div className="bg-white-100 border-2 rounded p-4" key={index}>
                 <h4 className="font-bold">{offer.offer}</h4>
                 <p className="text-gray-700">{offer.description}</p>
@@ -251,7 +342,7 @@ const ProductDetails = (props) => {
           <div className="bg-white-100 rounded p-4">
             <h4 className="text-xl font-bold mb-2">About this item</h4>
 
-            {product.description.map((item, index) => (
+            {product?.description.map((item, index) => (
               <span key={index} className="text-gray-700 block my-2">
                 {item}
               </span>
@@ -270,21 +361,15 @@ const ProductDetails = (props) => {
 
       <div className="px-6 flex flex-row justify-between">
 
-         { session && (session.user||session.data) && (!has_Logged_In_user_reviewed) && <div className="w-3/12">
-              <Button
-                  variant="gradient"
-                  color="purple"
-                  onClick={() => setReviewBox(!reviewBox)}
-                  className="mb-6"
-              >
-                Write a review
-                </Button>
-           
-            {reviewBox && (
-              <div className="">
-                {/* <ReviewInputBox /> */}
-                <label for="rating" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select rating</label>
-                  <select id="rating" className="bg-gray-50 mb-4 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-purple-500 focus:border-purple-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-500 dark:focus:border-blue-500"
+         { isAuthenticated && userStateRedux && notuserReview && <div className="w-3/12">
+             
+      
+
+              <div className="flex flex-col gap-y-4">
+                <label htmlFor="rating" className="block text-sm font-medium text-gray-900 dark:text-white">Select rating</label>
+                  <select 
+                  id="rating" 
+                  className="bg-gray-50  border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-purple-500 focus:border-purple-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-500 dark:focus:border-blue-500"
                   onChange={(e)=>setRating(e.target.value)}
                   >
                     <option value="1">Poor</option>
@@ -294,7 +379,9 @@ const ProductDetails = (props) => {
                     <option value="5">Excellent</option>
                   </select>
 
-                <Textarea label="Review" size="md" color="purple"className="mb-4" onChange={(e)=>setComment(e.target.value)}/>
+
+                <Input size="lg" color="purple" label="Enter your review title"  onChange={(e)=>setTitle(e.target.value)}/>
+                <Textarea label="Review" size="md" color="purple" className="p-4" onChange={(e)=>setComment(e.target.value)}/>
 
                 <Button
                   variant="gradient"
@@ -304,50 +391,16 @@ const ProductDetails = (props) => {
                   Post
                 </Button>
               </div>
-            )}
+            
           </div>
 }
 
-        <div className={`${ (session && (session.user||session.data)) ? "w-8/12" : "w-10/12" } mt-4 w-screen-md px-10 py-4`}>
+        <div className={`${ (notuserReview) ? "w-8/12" : "w-10/12" } mt-4 w-screen-md px-10 py-4`}>
           <div>
-            {product.reviews.length > 0 ? (
-              <ul className={`${ (session && (session.user||session.data)?"grid-cols-2 ":"grid-cols-3")} w-full grid gap-4`}>
-                {product.reviews.map((review, index) => (
-            
-                  <Card
-                    color="transparent"
-                    shadow={false}
-                    className="w-full max-w-[26rem] border-2 border-purple-200 px-6"
-                  >
-                    <CardHeader
-                      color="transparent"
-                      floated={false}
-                      shadow={false}
-                      className="mx-0 flex items-center gap-4 pt-0 pb-4"
-                    >
-                      <Avatar
-                        size="lg"
-                        variant="circular"
-                        src={review.profile_image}
-                        alt="candice wu"
-                      />
-                      <div className="flex w-full flex-col gap-0.5">
-                        <div className="flex items-center justify-between">
-                          <Typography variant="h5" color="blue-gray">
-                              {review.name}
-                          </Typography>
-                          {/* <Rating value={review.rating} readonly/> */}
-                        </div>
-              
-                      </div>
-                    </CardHeader>
-                    <CardBody className="mb-6 p-0">
-                      <Typography>
-                        {review.comment}
-                      </Typography>
-                    </CardBody>
-                  </Card>
- 
+            {product?.reviews.length > 0 ? (
+              <ul className={`${ isAuthenticated?"grid-cols-1 ":"grid-cols-2"} w-full grid gap-4`}>
+                {product?.reviews.map((review, index) => (
+                  <ReviewBox review={review} />
                 ))}
               </ul>
             ) : (
@@ -363,4 +416,5 @@ const ProductDetails = (props) => {
 };
 
 
-export default ProductDetails;
+
+export default dynamic(() => Promise.resolve(ProductDetails), {ssr: false});;

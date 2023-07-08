@@ -29,7 +29,7 @@ const Product = ({ product }) => {
     const token = localStorage.getItem("token");
 
     if (isAuthenticated) {
-      const res = await fetch(`${BACKEND_URL}api/v1/cart/item`, {
+      await fetch(`${BACKEND_URL}api/v1/cart/item`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
