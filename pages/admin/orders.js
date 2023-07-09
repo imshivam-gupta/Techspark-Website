@@ -1,22 +1,60 @@
-import { Spinner, Typography } from "@material-tailwind/react";
+import { Spinner, Switch, Typography } from "@material-tailwind/react";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import AdminLayout from "../../components/AdminLayout";
 import { BACKEND_URL } from "../../utils/dbconnect";
-import Link from "next/link";
-import { PencilSquareIcon } from "@heroicons/react/24/outline";
- 
 
-const TABLE_HEAD = ["Created At", "Amount","Payment Status","Postal Code"," "];
 
-const TableRow = ({ id,image,title,createdAt,totalPrice,paid_status,zipcode}) => {
-    console.log(totalPrice)
+const monthNames = ["January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
+
+const TABLE_HEAD = ["Created At", "Amount","Payment","Delivery","Postal Code","Delivery Succesfull"];
+
+const TableRow = ({ id,image,title,createdAt,totalPrice,paid_status,zipcode,isdel_status}) => {
+    
+  const [del_status,setDel_status] = useState(isdel_status);
+
+  const [just_changed,setJust_changed] = useState(false);
+
+  const change_del_status = async (e) => {
+   
+    e.preventDefault();
+      console.log("changing status");
+      await axios.patch(`${BACKEND_URL}api/v1/orders/${id}`, {
+        isDelivered: !del_status,
+      },{
+        headers: {
+          "Content-Type": "application/json",
+          "authorization": `Bearer ${localStorage.getItem("token")}`
+        }
+      }
+      ).then((res) => {
+        if(res.status===200) setDel_status(!del_status);
+        toast(
+          "Delivery Status Changed, Now please wait for 10 seconds to change the status again",
+          {
+            type: "success",
+            autoClose: 3000,
+            position: toast.POSITION.TOP_CENTER,
+          }
+        )
+        console.log(res);
+      }).catch((err) => {
+        console.log(err);
+      });
+  };
+
+
+    const date = new Date(createdAt);
+    const timstamp = `${date.getDate()} ${monthNames[date.getMonth()]} ${date.getFullYear()}`
     return(
     <div className="grid grid-cols-8 border-t border-stroke py-4.5 px-4 dark:border-strokedark sm:grid-cols-8 md:px-6 2xl:px-7.5">
     <div className="col-span-2 flex items-center">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <div className="h-12.5 w-15 rounded-md">
-          <img src={image} alt="Product" />
+          <img src={image} alt="Product" className="rounded-lg"/>
         </div>
         <p className="text-sm text-black dark:text-white">
           {title}
@@ -24,26 +62,22 @@ const TableRow = ({ id,image,title,createdAt,totalPrice,paid_status,zipcode}) =>
       </div>
     </div>
     <div className="col-span-1 hidden items-center sm:flex">
-      <p className="text-sm text-black dark:text-white">{createdAt}</p>
+      <p className="text-sm text-black dark:text-white">{timstamp}</p>
     </div>
     <div className="col-span-1 flex items-center">
-      <p className="text-sm text-black dark:text-white">{totalPrice}</p>
+      <p className="text-sm text-black dark:text-white">&#8377; {totalPrice}</p>
     </div>
     <div className="col-span-1 flex items-center">
       <p className="text-sm text-black dark:text-white">{paid_status}</p>
     </div>
     <div className="col-span-1 flex items-center">
-      <p className="text-sm text-black dark:text-white">{zipcode}</p>
+    <p className="text-sm text-black dark:text-white">{del_status===true ? "Delivered" : "Pending"}</p>
     </div>
     <div className="col-span-1 flex items-center">
-      <Link href ={`mailto: ${zipcode}`} className="text-sm text-black dark:text-white">Send Now</Link>
+      <p className="text-sm text-black dark:text-white">{zipcode}</p>
     </div>
     <div className="col-span-1 w-full flex flex-row items-center justify-center">
-      <Link href={`/admin/products/edit/${id}`} className="">
-      <p className="text-sm text-meta-3 dark:text-white w-full">
-        <PencilSquareIcon className="h-6 w-6"/>
-      </p>
-      </Link>
+      <Switch id="purple" color="purple" checked={del_status} onChange={change_del_status} />
     </div>
   </div>
 )}
@@ -75,14 +109,16 @@ const AdminOrders = () => {
                 authorization: `Bearer ${token}`,
                 },
             }).catch((error) => {
-                console.log(error.response.data.message);
+                console.log(error);
                 setError(error.response.data.message);
                 setLoading(false);
             });
                 
             // console.log(response.data.data.orders);
 
+
             if(error===null){
+                console.log(response.data)
                 setOrders(response.data.data.orders);
                 setLoading(false);
             }
@@ -120,7 +156,7 @@ const AdminOrders = () => {
      </div>
 
        {
-           orders.map(({createdAt,totalPrice,shippingAddress,items,isPaid,_id}) => (
+           orders.map(({_id,createdAt,totalPrice,shippingAddress,items,isPaid,isDelivered}) => (
                <TableRow
                     key={_id}
                     id={_id}
@@ -130,6 +166,7 @@ const AdminOrders = () => {
                     totalPrice={totalPrice}
                     paid_status={isPaid===true ? "Paid" : "Pending"}
                     zipcode={shippingAddress?.postalCode}
+                    isdel_status={isDelivered}
                />
            ))
        }

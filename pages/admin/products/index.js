@@ -1,8 +1,8 @@
 import { Spinner, Typography } from "@material-tailwind/react";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import AdminLayout from "../../components/AdminLayout";
-import { BACKEND_URL } from "../../utils/dbconnect";
+import AdminLayout from "../../../components/AdminLayout";
+import { BACKEND_URL } from "../../../utils/dbconnect";
 import Link from "next/link";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
  
@@ -14,7 +14,7 @@ const TableRow = ({ id,image,title, price, category, brand, count_in_stock,selle
     <div className="col-span-2 flex items-center">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <div className="h-12.5 w-15 rounded-md">
-          <img src={image} alt="Product" />
+          <img src={image} alt="Product" className="rounded-lg"/>
         </div>
         <p className="text-sm text-black dark:text-white">
           {title}
@@ -25,20 +25,20 @@ const TableRow = ({ id,image,title, price, category, brand, count_in_stock,selle
       <p className="text-sm text-black dark:text-white">{category}</p>
     </div>
     <div className="col-span-1 flex items-center">
-      <p className="text-sm text-black dark:text-white">{`${price}`}</p>
+      <p className="text-sm text-black dark:text-white">&#8377; {price}</p>
     </div>
     <div className="col-span-1 flex items-center">
       <p className="text-sm text-black dark:text-white">{brand}</p>
     </div>
     <div className="col-span-1 flex items-center">
-      <p className="text-sm text-meta-3 dark:text-white">{count_in_stock}</p>
+      <p className="text-sm text-black  dark:text-white">{count_in_stock}</p>
     </div>
     <div className="col-span-1 flex items-center">
-      <p className="text-sm text-meta-3 dark:text-white">{seller.split(" ").slice(0,1).join(0,1)}</p>
+      <p className="text-sm text-black  dark:text-white">{seller.split(" ").slice(0,1).join(0,1)}</p>
     </div>
     <div className="col-span-1 w-full flex flex-row items-center justify-center">
-      <Link href={`/admin/products/edit/${id}`} className="">
-      <p className="text-sm text-meta-3 dark:text-white w-full">
+      <Link href={`/admin/products/${id}`} className="">
+      <p className="text-sm text-black  dark:text-white w-full">
         <PencilSquareIcon className="h-6 w-6"/>
       </p>
       </Link>

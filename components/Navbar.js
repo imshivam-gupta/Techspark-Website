@@ -21,7 +21,7 @@ const profileMenuItems = [
   {
     label: "Edit Profile",
     icon: Cog6ToothIcon,
-    url: "/edit-profile"
+    url: "/profile"
   },
   {
     label: "My Orders",
@@ -212,8 +212,14 @@ const Navbar = () => {
 
       <Logo />
       <SearchBar />
+
+      <Link href={"/login"} className="flex items-center ">
+        <div className="text-gray-700 hover:text-blue-500 block lg:hidden">
+          Signin
+        </div>
+      </Link>
       
-      <ul className={`flex w-5/12 items-center justify-end pr-4 opacity-100 transition-opacity`}>
+      <ul className={`flex w-5/12 items-center justify-end pr-4 opacity-100 transition-opacity hidden lg:flex`}>
         <NavLink text="Shop" href="/" />
         {isAuthenticated &&  user?.role ==='admin' && <NavLink text={'Admin Panel'} href={'/admin/orders' }/> }
         {isAuthenticated &&  user?.role === 'user' && 

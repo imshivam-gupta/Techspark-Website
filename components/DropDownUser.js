@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from "next/link";
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { userActions } from '../store/user-slice';
 import { useRouter } from "next/router";
 import dynamic from "next/dynamic";
+import { fetchuserdata } from '../store/user-actions';
 
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+
 
   const trigger = useRef(null);
   const dropdown = useRef(null);
@@ -38,6 +40,14 @@ const DropdownUser = () => {
   });
 
   const dispatch = useDispatch();
+
+  
+  let isAuthenticated = true;
+  if(localStorage.getItem("token")===null) isAuthenticated=false;
+  const user = useSelector((state) => state.user);
+  if(isAuthenticated && user?.image==='') dispatch(fetchuserdata());
+      
+
   const router = useRouter();
 
   const signOut = () =>{
@@ -59,10 +69,15 @@ const DropdownUser = () => {
         href="#"
       >
         
-        
+        <span className="hidden text-right lg:block">
+          <span className="block text-sm font-medium text-black dark:text-white">
+            {user.name}
+          </span>
+          <span className="block text-xs">Admin Techspark</span>
+        </span>
 
-        <span className="h-12 w-12 rounded-full">
-          <img src={"/user.png"} alt="User" className='h-8 w-8' />
+        <span className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
+          <img src={user.image} alt="User" className='h-8 w-8' />
         </span>
 
         <svg
