@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-
+import Head from "next/head";
 // Components Dependencies
 import ProductCarousel from "../components/Carousel";
 import Product from "../components/Product";
@@ -39,8 +39,14 @@ const HomePage = () => {
   
 
   return (
-  
 
+    <>
+
+    <Head>
+        <title>Home</title>
+        <meta name="description" content="Home" />
+        <link rel="icon" href="/logosvg.svg" />
+      </Head>
       <div className="mb-14">
 
         <ProductCarousel products={products}/>
@@ -71,6 +77,7 @@ const HomePage = () => {
           </div>
         </div>
       </div>
+                  </>
   )
 }
 
