@@ -1,246 +1,243 @@
 import Link from "next/link";
 import React, { useState } from "react";
-import { signOut, useSession } from "next-auth/react";
 import { Avatar, Button, Menu, MenuHandler, MenuItem, MenuList, Typography } from "@material-tailwind/react";
-
-import {
-  CubeTransparentIcon,
-  UserCircleIcon,
-  CodeBracketSquareIcon,
-  Square3Stack3DIcon,
-  ChevronDownIcon,
-  Cog6ToothIcon,
-  InboxArrowDownIcon,
-  LifebuoyIcon,
-  PowerIcon,
-  RocketLaunchIcon,
-  Bars2Icon,
-} from "@heroicons/react/24/outline";
+import { UserCircleIcon,ChevronDownIcon,Cog6ToothIcon,InboxArrowDownIcon,LifebuoyIcon,PowerIcon,} from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
+import { useDispatch, useSelector } from "react-redux";
+import dynamic from "next/dynamic";
+import { userActions } from "../store/user-slice";
+import { SearchBar } from "./SearchBar";
+import { fetchuserdata } from "../store/user-actions";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { BACKEND_URL } from "../utils/dbconnect";
 
 const profileMenuItems = [
   {
     label: "My Profile",
     icon: UserCircleIcon,
+    url: "/profile"
   },
   {
     label: "Edit Profile",
     icon: Cog6ToothIcon,
+    url: "/profile"
   },
   {
-    label: "Inbox",
+    label: "My Orders",
     icon: InboxArrowDownIcon,
+    url: "/my-orders"
   },
   {
-    label: "Help",
+    label: "Developer",
     icon: LifebuoyIcon,
+    url: "https://shivam-gupta.vercel.app/"
   },
   {
     label: "Sign Out",
     icon: PowerIcon,
+    url: "/signout"
   },
 ];
+
+
+const NavLink = ({ text, href }) => {
+  return(
+    <li className="hidden lg:block">
+      <Link href={href}>
+        <div className="py-2 px-4 text-gray-700 hover:text-blue-500">
+          {text}
+        </div>
+      </Link>
+    </li>
+)};
+  
  
-function ProfileMenu({data}) {
+const Logo = () => {
+  return(
+    <Link className="items-center flex-grow w-1/12 hidden md:flex" href={"/"}>
+      <img src="/logo4.png" className="h-12 mr-3" alt="Logo" />
+    </Link>
+)};
 
 
+const ProfileMenu = ({data}) => {
+
+  const router= useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const closeMenu = () => setIsMenuOpen(false);
+  const dispatch = useDispatch();
+
+  const signOut = () =>{
+    let user = {};
+    localStorage.removeItem('token');
+    localStorage.removeItem('mailsent');
+    dispatch(userActions.replaceUser(user));
+    router.push("/login");
+  }
  
   return (
-    <Menu open={isMenuOpen} handler={setIsMenuOpen} placement="bottom-end">
-      <MenuHandler>
-        <Button
-          variant="text"
-          color="blue-gray"
-          className="flex items-center gap-1 rounded-full py-0.5 pr-2 pl-0.5 lg:ml-auto"
-        >
-          <Avatar
-            variant="circular"
-            size="sm"
-            alt="candice wu"
-            className="border border-blue-500 p-0.5"
-            src={data.image}
-          />
-          <ChevronDownIcon
-            strokeWidth={2.5}
-            className={`h-3 w-3 transition-transform ${
-              isMenuOpen ? "rotate-180" : ""
-            }`}
-          />
-        </Button>
-      </MenuHandler>
-      <MenuList className="p-1">
-        {profileMenuItems.map(({ label, icon }, key) => {
-          const isLastItem = key === profileMenuItems.length - 1;
-          return (
-            <MenuItem
-              key={label}
-              onClick={isLastItem ?   (e) => {
-                e.preventDefault();
-                signOut(); 
-              } : closeMenu}
-              className={`flex items-center gap-2 rounded ${
-                isLastItem
-                  ? "hover:bg-red-500/10 focus:bg-red-500/10 active:bg-red-500/10"
-                  : ""
+    <li>
+      <Menu open={isMenuOpen} handler={setIsMenuOpen} placement="bottom-end">
+        <MenuHandler>
+          <Button
+            variant="text"
+            color="blue-gray"
+            className="flex items-center gap-1 rounded-full py-0.5 pr-2 pl-0.5 lg:ml-auto"
+          >
+            <Avatar
+              variant="circular"
+              size="sm"
+              alt="candice wu"
+              className="border border-blue-500 p-0.5"
+              src={data.image}
+            />
+            <ChevronDownIcon
+              strokeWidth={2.5}
+              className={`h-3 w-3 transition-transform ${
+                isMenuOpen ? "rotate-180" : ""
               }`}
-            >
-              {React.createElement(icon, {
-                className: `h-4 w-4 ${isLastItem ? "text-red-500" : ""}`,
-                strokeWidth: 2,
-              })}
-              <Typography
-                as="span"
-                variant="small"
-                className="font-normal"
-                color={isLastItem ? "red" : "inherit"}
+            />
+          </Button>
+        </MenuHandler>
+        <MenuList className="p-1">
+
+          {profileMenuItems.slice(0,profileMenuItems.length-1).map(({ label, icon,url }, key) => {
+            const isLastItem = key === profileMenuItems.length - 1;
+            return (
+              <MenuItem
+                key={label}
+                onClick={ ()=>{router.push(url)}}
+                className={`flex items-center gap-2 rounded ${
+                  isLastItem
+                    ? "hover:bg-red-500/10 focus:bg-red-500/10 active:bg-red-500/10"
+                    : ""
+                }`}
               >
-                {label}
-              </Typography>
+
+                {React.createElement(icon, {
+                  className: `h-4 w-4 ${isLastItem ? "text-red-500" : ""}`,
+                  strokeWidth: 2,
+                })}
+                <Typography
+                  as="span"
+                  variant="small"
+                  className="font-normal"
+                  color={isLastItem ? "red" : "inherit"}
+                >
+                  {label}
+                </Typography>
+              </MenuItem>
+            );
+          })}
+
+          <MenuItem
+                key={"Sign Out"}
+                onClick={() => signOut()}
+                className="flex items-center gap-2 rounded hover:bg-red-500/10 focus:bg-red-500/10 active:bg-red-500/10"
+                >
+
+          {React.createElement(PowerIcon, {
+                  className: "h-4 w-4 text-red-500",
+                  strokeWidth: 2,
+                })}
+                <Typography
+                  as="span"
+                  variant="small"
+                  className="font-normal"
+                  color={"red"}
+                >
+                  Sign Out
+            </Typography>
+
             </MenuItem>
-          );
-        })}
-      </MenuList>
-    </Menu>
+                    
+                
+        </MenuList>
+      </Menu>
+      </li>
   );
 }
 
 
-function Navbar({ user }) {
-  const { data: session, status } = useSession();
-  const [keyword,setKeyword] = useState('')
-  const loading = status === "loading";
+const Navbar = () => {
 
-  const router = useRouter();
+  let isAuthenticated = true;
+  if(localStorage.getItem("token")===null) isAuthenticated=false;
+  const user = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+  if(isAuthenticated && user?.image==='') dispatch(fetchuserdata());
 
-  const submitHandler = (e) => {
-    e.preventDefault()
+  const showToast = () =>
+    toast("Incorrect Credentials. Try again or register yourself", {
+      hideProgressBar: true,
+      autoClose: 3000,
+      type: "error",
+      position: toast.POSITION.TOP_CENTER,
+  });
 
-    if(keyword.trim()){
-        router.push(`/search/?query=${keyword}`)
+  const requestAdminHandler = async () =>{
+    if(localStorage.getItem('mailsent')){
+      toast("Mail Already Sent", {
+        hideProgressBar: true,
+        autoClose: 3000,
+        type: "error",
+        position: toast.POSITION.TOP_CENTER,
+      });
+      return;
     }
-    else{
-      router.push(`/`)
-    }
+
+    const are_u_sure = window.confirm("Are you sure you want to request admin access?");
+    if(!are_u_sure) return;
+
+    await axios.get(`${BACKEND_URL}api/v1/users/requestadmin`,{
+      headers: {
+        'content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    }).then((res)=>{
+      localStorage.setItem('mailsent',true);
+      toast("Mail Sent Successfully", {
+        hideProgressBar: true,
+        autoClose: 3000,
+        type: "success",
+        position: toast.POSITION.TOP_CENTER,
+      });
+    }).catch((err)=>{
+      console.log(err);
+    })
   }
-
-
-  // console.log(session);
 
   return (
     <nav className="flex flex-row justify-around py-2 px-4 bg-white-200 relative gap-4 shadow-xl z-50">
 
+      <Logo />
+      <SearchBar />
 
-      <div className="flex items-center flex-grow w-1/12">
-        <Link href="/">
-          <img src="/logo4.png" className="h-12 mr-3" alt="Logo" />
-        </Link>
-      </div>
-
-      <form className="relative w-4/12 h-full" onSubmit={submitHandler}>
-        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-          <svg
-            aria-hidden="true"
-            className="w-5 h-5 text-gray-500 dark:text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            ></path>
-          </svg>
+      <Link href={"/login"} className="flex items-center ">
+        <div className="text-gray-700 hover:text-blue-500 block lg:hidden">
+          Signin
         </div>
-        <input
-          type="text"
-          id="default-search"
-          className="block w-full py-3 pl-10 text-sm text-gray-900 border border-gray-300 outline-none rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
-          placeholder="Search Laptops, Keyboards..."
-          required
-          onChange={e => setKeyword(e.target.value)}
-        />
-      </form>
-
-      <ul className={`flex w-5/12 items-center justify-end pr-4 ${ !session && loading ? "opacity-0" : "opacity-100"} transition-opacity`}>
-        <li>
-          <Link href="/">
-            <div className="py-2 px-4 text-gray-700 hover:text-blue-500">
-              Home
-            </div>
-          </Link>
-        </li>
-        <li>
-          <Link href="/dashboard">
-            <div className="py-2 px-4 text-gray-700 hover:text-blue-500">
-              Dashboard
-            </div>
-          </Link>
-        </li>
-        <li>
-          <Link href="/cart">
-            <div className="py-2 px-4 text-gray-700 hover:text-blue-500">
-              Cart
-            </div>
-          </Link>
-        </li>
-
-        {!loading && !session && (
-          <li>
-            <Link href="/login">
+      </Link>
+      
+      <ul className={`flex w-5/12 items-center justify-end pr-4 opacity-100 transition-opacity hidden lg:flex`}>
+        <NavLink text="Shop" href="/" />
+        {isAuthenticated &&  user?.role ==='admin' && <NavLink text={'Admin Panel'} href={'/admin/orders' }/> }
+        {isAuthenticated &&  user?.role === 'user' && 
+          <li className="hidden lg:block cursor-pointer" onClick={requestAdminHandler}>
               <div className="py-2 px-4 text-gray-700 hover:text-blue-500">
-                Sign In
+                {'Request Admin Access'}
               </div>
-            </Link>
           </li>
-        )}
-
-        {/* {session && (
-          <li>
-            <Link href="/api/auth/signout">
-              <div
-                onClick={(e) => {
-                  e.preventDefault();
-                  signOut();
-                }}
-                className="py-2 px-4 text-gray-700 hover:text-blue-500"
-              >
-                Sign Out
-              </div>
-            </Link>
-          </li>
-        )} */}
-        {/* {session && (
-          <li>
-            {session?.user && (
-              <div>
-                {session.user.name && (
-                  <div className="py-2 px-4 text-gray-700 hover:text-blue-500 flex flex-col">
-                    <span className="font-bold">{session.user.name.split(" ")[0]}</span>
-                  </div>
-                )}
-              </div>
-            )}
-          </li>
-        )} */}
-        {session && (
-          <li>
-            {session?.user &&  session.user.image &&  session.user.name && (
-              <ProfileMenu data={session.user}/>
-              // <div className="flex items-center gap-2 ml-4">
-              // <Avatar src={`${session.user.image}`} alt="avatar" size="sm" />
-              //   <Typography variant="h6">{session.user.name.split(" ")[0]}</Typography>
-              // </div> 
-            )}
-          </li>
-        )}
+        }
+        <NavLink text="Developer" href="https://shivam-gupta.vercel.app/" />
+        <NavLink text="Cart" href="/cart" />
+        {!isAuthenticated && <NavLink text="Sign In" href="/login" />}
+        {isAuthenticated &&  user?.image && <ProfileMenu data={user}/> }
       </ul>
+
     </nav>
   );
 }
 
-export default Navbar;
+
+export default dynamic(() => Promise.resolve(Navbar), {ssr: false});

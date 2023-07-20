@@ -7,7 +7,6 @@ import dbConnect from "../../../lib/dbconnect";
 import User from "../../../models/user";
 import { MongoDBAdapter } from "@next-auth/mongodb-adapter";
 import clientPromise from "../../..//lib/mdbclient";
-import { getToken } from "next-auth/jwt"
 
 export const authOptions = {
   providers: [
@@ -25,7 +24,7 @@ export const authOptions = {
         
         await dbConnect();
 
-        console.log(credentials);
+
 
         const temp = await User.findOne({
           email: credentials.email,

@@ -1,35 +1,50 @@
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import {  useRouter } from "next/router";
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { cartActions } from "../store/cart-slice";
+import { BACKEND_URL } from "../utils/dbconnect";
 
 const Product = ({ product }) => {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const user = useSelector((state) => state.user);
+  const[isAuthenticated,setIsAuthenticated] = useState(false);
+  if(user.email!=="" && !isAuthenticated) setIsAuthenticated(true); 
 
-  const addToCartHandler = async (id) => {
-    if (session) {
-      await fetch("/api/cart", {
+  
+  const dispatch = useDispatch();
+
+  const addToCartHandler = async () => {
+    const prod = {
+      productId:product._id,
+      productName:product.name,
+      productPrice:product.price,
+      productImage:product.main_image,
+      qty:1,
+      countInStock:product.countInStock,
+    }
+    dispatch(cartActions.addItemToCart(prod))
+    router.push("/cart");
+    const token = localStorage.getItem("token");
+
+    if (isAuthenticated) {
+      await fetch(`${BACKEND_URL}api/v1/cart/item`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          user_email: session.user.email,
+          authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          productId: id,
+          productId: product._id,
           qty: 1,
         }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data) {
-            router.push("/cart");
-          }
-        });
-    } else {
-      router.push("/login");
-    }
+      }).then((res) => res.json());
+
+    } 
   };
 
+  
   return (
     <div className="w-72 bg-white shadow-2xl rounded-xl duration-500 border hover:scale-105 hover:shadow-xl mb-4">
       <Link href={`product/${product._id}`}>

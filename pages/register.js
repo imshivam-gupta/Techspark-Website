@@ -5,16 +5,21 @@ import { HiEye } from "react-icons/hi";
 import { registerValidate } from "../lib/validate";
 import { useFormik } from "formik";
 import { toast } from "react-toastify";
+import { useDispatch } from "react-redux";
+import { BACKEND_URL } from "../utils/dbconnect";
+import { userActions } from "../store/user-slice";
 
 export default function RegisterPage() {
 
   const router = useRouter();
 
-  const showToast = () =>
-    toast("Signup was successful. Now login to continue....", {
-      hideProgressBar: false,
-      autoClose: 5000,
-      type: "success",
+  const [signingup, setSigningup] = useState(false);
+
+  const showToast = (msg) =>
+    toast(msg, {
+      hideProgressBar: true,
+      autoClose: 1000,
+      type: "error",
       position: toast.POSITION.TOP_CENTER,
     });
   
@@ -25,23 +30,35 @@ export default function RegisterPage() {
     router.push("/login");
   };
 
-  const onSubmit = async (values) => {
-    console.log(values);
+  const dispatch = useDispatch();
 
-    await fetch("/api/auth/signup", {
+
+
+  const onSubmit = async (values) => {
+    setSigningup(true);
+    const res = await fetch(`${BACKEND_URL}api/v1/users/signup`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(values),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if(data){
-            showToast();
-            router.push("https://techspark.vercel.app/login");
-        }  
-      });
+      body: JSON.stringify({
+        "name":values.name,
+        "email":values.email,
+        "password":values.password,
+        "passwordConfirm":values.cpassword,
+      }),
+    });
+
+    const data = await res.json();
+   
+    if(data.status === "success"){
+      localStorage.setItem("token", data.token);
+      dispatch(userActions.replaceUser( data.data.user));
+      router.push("/");
+    } else{
+      showToast(data.message);
+    }
+    setSigningup(false);
   };
 
   const formik = useFormik({
@@ -54,6 +71,12 @@ export default function RegisterPage() {
     validate: registerValidate,
     onSubmit,
   });
+
+  if(signingup) return (
+    <section className="mt-6 flex flex-row justify-center min-h-screen pt-6">
+      Wait while we register you
+    </section>
+  );
 
   return (
     <section className="mt-6 flex flex-row justify-center min-h-screen pt-6">
@@ -166,7 +189,7 @@ export default function RegisterPage() {
                 type={show.cpassword ? "text" : "password"}
                 name="cpassword"
                 placeholder="Confirm Password"
-                onChange={(e) => (pass.current = e.target.value)}
+                onChange={(e) => (cpass.current = e.target.value)}
                 {...formik.getFieldProps("cpassword")}
               />
               <span
