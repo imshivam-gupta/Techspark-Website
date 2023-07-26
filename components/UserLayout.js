@@ -6,8 +6,9 @@ import { IconButton, SpeedDial,  SpeedDialHandler,SpeedDialContent, SpeedDialAct
 import { PlusIcon, HomeIcon, ArrowLeftIcon, ShoppingCartIcon,} from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useState } from "react";
 
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import { GCLIENTID } from "../utils/dbconnect";
 
 export default function Layout({ children }) {
   
@@ -20,11 +21,13 @@ export default function Layout({ children }) {
 
   return (
     <>
+        <ToastContainer />
         <Navbar />
 
-        <main>{children}</main>
+        <GoogleOAuthProvider clientId={`${GCLIENTID}`}>
+            <main>{children}</main>
+        </GoogleOAuthProvider>
 
-        <ToastContainer />
 
 
         <footer className="w-full bg-white p-8 mt-20">

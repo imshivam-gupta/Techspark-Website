@@ -76,7 +76,6 @@ const ProfileMenu = ({data}) => {
   }
  
   return (
-    <li>
       <Menu open={isMenuOpen} handler={setIsMenuOpen} placement="bottom-end">
         <MenuHandler>
           <Button
@@ -154,7 +153,6 @@ const ProfileMenu = ({data}) => {
                 
         </MenuList>
       </Menu>
-      </li>
   );
 }
 
@@ -213,12 +211,18 @@ const Navbar = () => {
       <Logo />
       <SearchBar />
 
-      <Link href={"/login"} className="flex items-center ">
+      {!isAuthenticated && <Link href={"/login"} className="flex items-center ">
         <div className="text-gray-700 hover:text-blue-500 block lg:hidden">
           Signin
         </div>
-      </Link>
-      
+      </Link> }
+
+      {isAuthenticated && user?.image && 
+        <div className="text-gray-700 hover:text-blue-500 block lg:hidden">
+          <ProfileMenu data={user} /> 
+        </div>
+      }
+
       <ul className={`flex w-5/12 items-center justify-end pr-4 opacity-100 transition-opacity hidden lg:flex`}>
         <NavLink text="Shop" href="/" />
         {isAuthenticated &&  user?.role ==='admin' && <NavLink text={'Admin Panel'} href={'/admin/orders' }/> }
@@ -232,12 +236,11 @@ const Navbar = () => {
         <NavLink text="Developer" href="https://shivam-gupta.vercel.app/" />
         <NavLink text="Cart" href="/cart" />
         {!isAuthenticated && <NavLink text="Sign In" href="/login" />}
-        {isAuthenticated &&  user?.image && <ProfileMenu data={user}/> }
+        {isAuthenticated &&  user?.image && <li><ProfileMenu data={user}/></li>}
       </ul>
 
     </nav>
   );
 }
-
 
 export default dynamic(() => Promise.resolve(Navbar), {ssr: false});

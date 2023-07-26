@@ -1,52 +1,33 @@
-import { useRouter } from "next/router";
 import Head from "next/head";
-// Components Dependencies
 import ProductCarousel from "../components/Carousel";
 import Product from "../components/Product";
-
-// Skeleton Card for loading
 import SkeletonCard from "../components/SkeletonCard";
-
-// Redux Dependecies
-import { useContext, useEffect } from "react";
+import {  useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProductData } from "../store/products-actions";
-
-// Material Tailwind
 import { Typography } from "@material-tailwind/react";
-import { fetchuserdata } from "../store/user-actions";
 
 
 
 const HomePage = () => {
-
   const dispatch = useDispatch();
-
   useEffect(() => {
     if(products.length === 0) dispatch(fetchProductData());
   }, [dispatch]);
-
-
   const productState = useSelector((state) => state.products);
   const { products, loading } = productState;
-
-  const userState = useSelector((state) => state.user);
-
-
-
   const cards = ["1", "2", "3", "4", "5", "6", "7", "8"];
 
   
-
   return (
 
     <>
-
-    <Head>
-        <title>Home</title>
-        <meta name="description" content="Home" />
-        <link rel="icon" href="/logosvg.svg" />
+      <Head>
+          <title>Home</title>
+          <meta name="description" content="Home" />
+          <link rel="icon" href="/favicon.png" />
       </Head>
+
       <div className="mb-14">
 
         <ProductCarousel products={products}/>
@@ -61,7 +42,7 @@ const HomePage = () => {
                 loading ? 
               
                 cards.map((card) => (
-                      <div className="flex">
+                      <div className="flex" key={card}>
                         <SkeletonCard />
                       </div>
                 )) : 
@@ -77,7 +58,7 @@ const HomePage = () => {
           </div>
         </div>
       </div>
-                  </>
+    </>
   )
 }
 

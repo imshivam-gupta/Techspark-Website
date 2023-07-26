@@ -1,6 +1,5 @@
-import { useSession } from "next-auth/react";
 import Link from "next/link";
-import {  useRouter } from "next/router";
+import { useRouter } from "next/router";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { cartActions } from "../store/cart-slice";

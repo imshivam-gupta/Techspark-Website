@@ -14,7 +14,6 @@ const Shipping = () => {
   let isAuthenticated = true;
   if(localStorage.getItem('token')===null) isAuthenticated = false;
 
-  
   const router = useRouter();
 
   const [email,setEmail]=useState("");

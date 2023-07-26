@@ -20,8 +20,7 @@ export default function ProductCarousel({products}) {
    <Carousel
       autoPlay={true}
       interval={3000}
-      infiniteLoop={true}
-      // transition= {{ type: "tween", duration: 0.5 }}
+      loop={true}
       prevArrow={({ handlePrev }) => (
         <IconButton
           variant="text"
