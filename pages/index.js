@@ -6,10 +6,25 @@ import {  useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProductData } from "../store/products-actions";
 import { Typography } from "@material-tailwind/react";
+import io from "socket.io-client";
 
-
+let socket;
 
 const HomePage = () => {
+
+  useEffect(() => {
+   
+    socket = io("http://localhost:5000/");
+
+
+    socket.emit("connection", (error) => {
+      if (error) {
+        alert(error);
+      }
+    });
+  }, []);
+
+  
   const dispatch = useDispatch();
   useEffect(() => {
     if(products.length === 0) dispatch(fetchProductData());
@@ -18,7 +33,7 @@ const HomePage = () => {
   const { products, loading } = productState;
   const cards = ["1", "2", "3", "4", "5", "6", "7", "8"];
 
-  
+
   return (
 
     <>

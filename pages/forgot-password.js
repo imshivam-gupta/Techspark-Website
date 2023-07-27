@@ -3,14 +3,14 @@ import Image from "next/image";
 import { useFormik } from "formik";
 import login_validate from "../lib/validate";
 import { useState } from "react";
-import { HiEye } from "react-icons/hi";
+import { HiEye,HiArrowLeft } from "react-icons/hi";
 import { toast } from "react-toastify";
 import { BACKEND_URL } from "../utils/dbconnect";
 import { userActions } from "../store/user-slice";
 import dynamic from "next/dynamic";
 import { useDispatch } from "react-redux";
-import { GoogleLogin } from "@react-oauth/google";
 import { Button, Input, Typography } from "@material-tailwind/react";
+
 
 function LoginPage() {
   const jwt = require("jsonwebtoken");
@@ -111,7 +111,7 @@ function LoginPage() {
   if (signingup)
     return (
       <section className="mt-6 flex flex-row justify-center min-h-screen pt-6">
-        Please wait while we log you in
+        Please wait while we send you password reset link to your email
       </section>
     );
 
@@ -120,7 +120,7 @@ function LoginPage() {
       <div className="bg-gray-100 flex rounded-2xl shadow-lg max-w-6xl items-center h-max w-2/3 justify-stretch">
         <div className="md:w-2/3 px-8 md:px-16 py-6 ">
           <h2 className="font-bold text-2xl text-[#002D74] text-center">
-            Login
+            Forgot Password
           </h2>
           <p className="text-xs text-[#002D74] text-center">
             If you are already a member, easily log in
@@ -244,49 +244,16 @@ function LoginPage() {
             </div>
           </form>
 
-          <div className="mt-6 grid grid-cols-3 items-center text-gray-400 w-3/4 mx-auto">
-            <hr className="border-gray-400" />
-            <p className="text-center text-sm">OR</p>
-            <hr className="border-gray-400" />
-          </div>
-
-          <div className="mx-auto w-full flex flex-row justify-center mt-6">
-            <GoogleLogin
-              onSuccess={(credentialResponse) => {
-                onLoginSuccess(credentialResponse);
-                // console.log(credentialResponse);
-              }}
-              onError={() => {
-                console.log("Login Failed");
-              }}
-              useOneTap={true}
-              text="Continue with Google"
-              shape="pill"
-              logo_alignment="center"
-              width={320}
-              cancel_on_tap_outside
-              ux_mode="popup"
-            />
-          </div>
-
-          <div className="mt-5 w-3/4 mx-auto text-xs border-b border-[#002D74] py-4 text-[#002D74]">
-            <a href="/forgot-password">Forgot your password?</a>
-          </div>
-
-          <div className="mt-3 w-3/4 mx-auto text-xs flex justify-between items-center text-[#002D74]">
-            <p>Don't have an account?</p>
-
-            <button
-              className="py-2 px-5 bg-white border rounded-xl hover:scale-110 duration-300"
-              onClick={redirect_to_signup}
-            >
-              Register
-            </button>
+       
+        
+          <div className="mt-6 w-3/4 mx-auto text-md  flex justify-center gap-x-4  items-center text-[#002D74]">
+            <HiArrowLeft size={20} />
+            <p className="text-center">Back to Login</p>
           </div>
         </div>
 
         <div
-          className="lg:block hidden w-1/3 self-stretch h-full"
+          className="md:block hidden w-1/3 self-stretch h-full"
           style={{ minHeight: "100%" }}
         >
           <Image

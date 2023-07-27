@@ -3,20 +3,47 @@ import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 import { Typography } from "@material-tailwind/react";
 import { IconButton, SpeedDial,  SpeedDialHandler,SpeedDialContent, SpeedDialAction,} from "@material-tailwind/react";
-import { PlusIcon, HomeIcon, ArrowLeftIcon, ShoppingCartIcon,} from "@heroicons/react/24/outline";
+import { PlusIcon, ChatBubbleBottomCenterTextIcon,HomeIcon, ArrowLeftIcon, ShoppingCartIcon} from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useRouter } from "next/router";
-
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { GCLIENTID } from "../utils/dbconnect";
+import { motion,AnimatePresence } from "framer-motion";
+import {  useState } from "react";
+import ChatBox from "./ChatBox";
+import { fetchuserdata } from "../store/user-actions";
+import { useDispatch, useSelector } from "react-redux";
+
 
 export default function Layout({ children }) {
-  
-  const router = useRouter();
 
-  const handleBack = () => {
-    router.back();
+    const ISSERVER = typeof window === "undefined";
+    let isAuthenticated = true;
+    if(!ISSERVER) if(localStorage.getItem("token")===null) isAuthenticated=false;
+    const user = useSelector((state) => state.user);
+    const dispatch = useDispatch();
+    if(isAuthenticated && user?.image==='') dispatch(fetchuserdata());
+
+    const [isChatOpen, setIsChatOpen] = useState(true);
+    const router = useRouter();
+
+    const handleBack = () => {
+        router.back();
+    };
+
+  const handleChatToggle = () => {
+    if(!isAuthenticated) return router.push('/login');
+    if (!isChatOpen) {
+        setIsChatOpen(true);
+      } else {
+        setIsChatBoxSmall(true);
+        setTimeout(() => {
+          setIsChatOpen(false);
+        }, 400); // Adjust the delay (in milliseconds) to match your transition duration
+      }
   };
+
+
 
 
   return (
@@ -67,6 +94,24 @@ export default function Layout({ children }) {
         </SpeedDial>
         </div>
           
+        <div className="fixed bottom-25 right-10">
+        <motion.div
+            className={`bg-blue-500 rounded-full p-3 shadow-lg cursor-pointer ${ isChatOpen ? 'hidden' : ''}`}
+            onClick={handleChatToggle}
+            animate={{ scale: 1 }}
+        >
+          <ChatBubbleBottomCenterTextIcon className="h-6 w-6 text-white" />
+        </motion.div>
+      </div>
+
+      {isAuthenticated && <AnimatePresence>
+        {isChatOpen && (
+            <ChatBox setIsChatOpen={setIsChatOpen} isChatOpen={isChatOpen}/>
+        )}
+        </AnimatePresence>
+      }
+
+
     </>
   );
 }
