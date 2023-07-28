@@ -13,9 +13,9 @@ import {  useState } from "react";
 import ChatBox from "./ChatBox";
 import { fetchuserdata } from "../store/user-actions";
 import { useDispatch, useSelector } from "react-redux";
+import dynamic from "next/dynamic";
 
-
-export default function Layout({ children }) {
+const Layout = ({ children }) => {
 
     const ISSERVER = typeof window === "undefined";
     let isAuthenticated = true;
@@ -115,3 +115,4 @@ export default function Layout({ children }) {
     </>
   );
 }
+export default dynamic(() => Promise.resolve(Layout), { ssr: false });

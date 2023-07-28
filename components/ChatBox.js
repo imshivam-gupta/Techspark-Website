@@ -8,8 +8,9 @@ import { Textarea, IconButton, Typography } from "@material-tailwind/react";
 import { fetchuserdata } from '../store/user-actions';
 const serverURL = 'https://socket-server-tech.onrender.com/';
 let socket
+import dynamic from "next/dynamic";
 
-export default function ChatBox({setIsChatOpen,isChatOpen}) {
+const ChatBox = ({setIsChatOpen,isChatOpen}) => {
 
     const ISSERVER = typeof window === "undefined";
     let isAuthenticated = true;
@@ -254,3 +255,5 @@ export default function ChatBox({setIsChatOpen,isChatOpen}) {
 
   )
 }
+
+export default dynamic(() => Promise.resolve(ChatBox), { ssr: false });
