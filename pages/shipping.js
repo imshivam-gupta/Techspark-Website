@@ -19,8 +19,6 @@ const Shipping = () => {
   const [email,setEmail]=useState("");
   const [name,setName]=useState("");
   const [address, setAddress] = useState("");
-
-  // Combining all the address fields into one state
   const [selectedCountry, setSelectedCountry] = useState({ name: "India", isoCode: "IN" });
   const [selectedState, setSelectedState] = useState({ name: "Delhi", isoCode: "DL" });
   const [selectedCity, setSelectedCity] = useState("");
